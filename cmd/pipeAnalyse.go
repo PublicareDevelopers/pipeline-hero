@@ -5,6 +5,7 @@ import (
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/slack"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"math"
 	"os"
 	"os/exec"
 	"regexp"
@@ -67,6 +68,9 @@ var pipeAnalyseCmd = &cobra.Command{
 			color.Red("Error: %s\n", err)
 			os.Exit(255)
 		}
+
+		//round for 2 numbers
+		total = math.Floor((total * 100) / 100)
 
 		if total < BAD {
 			color.Red("coverage is BAD, have %f percent\n", total)

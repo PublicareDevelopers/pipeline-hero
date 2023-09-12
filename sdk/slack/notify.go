@@ -45,6 +45,9 @@ func BuildBitBucketMessage(message string) string {
 	repoFullName := os.Getenv("BITBUCKET_REPO_FULL_NAME")
 	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
 	commit := os.Getenv("BITBUCKET_COMMIT")
+	origin := os.Getenv("BITBUCKET_GIT_HTTP_ORIGIN")
 
-	return fmt.Sprintf("%s\nRepo: %s\nBuild: %s\nCommit: %s", message, repoFullName, buildNumber, commit)
+	bitbucketUrl := fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit)
+
+	return fmt.Sprintf("%s\nRepo: %s\nBuild: %s\nCommit: %s\nPipeline: %s", message, repoFullName, buildNumber, commit, bitbucketUrl)
 }
