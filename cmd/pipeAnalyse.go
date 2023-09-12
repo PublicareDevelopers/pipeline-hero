@@ -20,6 +20,12 @@ var pipeAnalyseCmd = &cobra.Command{
 		}
 
 		color.Green("%s\n", out)
+
+		slackUrl := os.Getenv("SLACK_WEBHOOK_URL")
+		if slackUrl == "" {
+			color.Red("Error: SLACK_WEBHOOK_URL is not set\n")
+			os.Exit(255)
+		}
 	},
 }
 
