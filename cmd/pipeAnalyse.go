@@ -10,10 +10,9 @@ import (
 // pipeAnalyseCmd represents the pipeAnalyse command
 var pipeAnalyseCmd = &cobra.Command{
 	Use:   "analyse",
-	Short: "analyse the actual pipeline",
+	Short: "",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		//print actual go version
 		out, err := exec.Command("go", "version").Output()
 		if err != nil {
 			color.Red("Error: %s\n", err)
