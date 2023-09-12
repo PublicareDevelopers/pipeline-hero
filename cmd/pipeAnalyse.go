@@ -34,6 +34,7 @@ var pipeAnalyseCmd = &cobra.Command{
 		color.Green("running tests\n")
 		out, err = exec.Command("go", "test", testSetup, fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
 		if err != nil {
+			fmt.Printf("%s\n", string(out))
 			color.Red("Error: %s\n", err)
 			os.Exit(255)
 		}
@@ -44,6 +45,7 @@ var pipeAnalyseCmd = &cobra.Command{
 		//go tool cover -func=cover.cov | tee coverage.txt
 		out, err = exec.Command("go", "tool", "cover", "-func=cover.cov").Output()
 		if err != nil {
+			fmt.Printf("%s\n", string(out))
 			color.Red("Error: %s\n", err)
 			os.Exit(255)
 		}
