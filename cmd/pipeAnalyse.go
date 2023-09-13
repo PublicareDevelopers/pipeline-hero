@@ -17,6 +17,7 @@ const MEDIUM = 75.0
 var useSlack bool
 var testSetup string
 var coverageThreshold float64
+var envVariables map[string]string
 
 // pipeAnalyseCmd represents the pipeAnalyse command
 var pipeAnalyseCmd = &cobra.Command{
@@ -31,7 +32,19 @@ var pipeAnalyseCmd = &cobra.Command{
 		}
 
 		color.Green("%s\n", out)
-		color.Green("running tests\n")
+
+		color.Green("setting environment if some arguments are given\n")
+		for key, value := range envVariables {
+			err := os.Setenv(key, value)
+			if err != nil {
+				color.Red("Error: %s\n", err)
+				os.Exit(255)
+			}
+
+			fmt.Println("set env variable", key, "to", value)
+		}
+
+		color.Green("\nrunning tests\n")
 		out, err = exec.Command("go", "test", testSetup, fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
 		if err != nil {
 			fmt.Printf("%s\n", string(out))
@@ -93,8 +106,9 @@ var pipeAnalyseCmd = &cobra.Command{
 				os.Exit(255)
 			}
 
-			message := slack.BuildBitBucketMessage(fmt.Sprintf("have %.2f  percent coverage\n", total))
-			err = client.Notify(message)
+			err = client.BuildBlocksByBitbucket(fmt.Sprintf("have %.2f  percent coverage\n", total)).
+				NotifyWithBlocks()
+
 			if err != nil {
 				color.Red("Error: %s\n", err)
 				os.Exit(255)
@@ -109,4 +123,5 @@ func init() {
 	pipeAnalyseCmd.Flags().Float64VarP(&coverageThreshold, "coverage-threshold", "c", 75.0, "Coverage threshold to use")
 	pipeAnalyseCmd.Flags().StringVarP(&testSetup, "test-setup", "t", "./...", "Test setup to use")
 	pipeAnalyseCmd.Flags().BoolVarP(&useSlack, "slack", "s", false, "Send results to slack")
+	pipeAnalyseCmd.Flags().StringToStringVarP(&envVariables, "env", "e", map[string]string{}, "Environment variables to set")
 }
