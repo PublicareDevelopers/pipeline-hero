@@ -46,7 +46,6 @@ func (slack *Slack) Notify(message string) error {
 func (slack *Slack) NotifyWithBlocks() error {
 	blockJson, err := json.Marshal(map[string]any{
 		"blocks": slack.Blocks,
-		"text":   "pipeline-hero: successfully pass through",
 	})
 	if err != nil {
 		return err
@@ -82,6 +81,7 @@ func (slack *Slack) NotifyWithBlocks() error {
 		return err
 	}
 
+	fmt.Printf("%s\n", string(blockJson))
 	fmt.Printf("Slack response: %+v\n", string(body))
 
 	return nil
@@ -108,16 +108,14 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 
 	messageBlock := map[string]any{
 		"type": "section",
-		"fields": []map[string]any{
-			{
-				"type": "plain_text",
-				"text": BuildBitBucketMessage(message),
-			},
+		"text": map[string]any{
+			"type": "plain_text",
+			"text": fmt.Sprintf("%s\nCommit: %s", message, commit),
 		},
 	}
 
 	deviderBlock := map[string]any{
-		"type": "devider",
+		"type": "divider",
 	}
 
 	actionBlock := map[string]any{
@@ -144,17 +142,19 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 
 	mainSection := map[string]any{
 		"type": "section",
-		"fields": []any{
-			deviderBlock,
-			headerBlock,
+		"fields": []map[string]any{
+			//deviderBlock,
+			//headerBlock,
 			actionBlock,
 		},
 	}
 
-	fmt.Println("mainSection", mainSection)
+	fmt.Println("mainSection", mainSection, deviderBlock, headerBlock, actionBlock)
 
 	slack.Blocks = append(slack.Blocks, messageBlock)
-	//slack.Blocks = append(slack.Blocks, mainSection)
+	slack.Blocks = append(slack.Blocks, deviderBlock)
+	slack.Blocks = append(slack.Blocks, headerBlock)
+	slack.Blocks = append(slack.Blocks, actionBlock)
 
 	return slack
 }
