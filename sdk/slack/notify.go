@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -73,8 +74,15 @@ func (slack *Slack) NotifyWithBlocks() error {
 	}()
 
 	if resp.StatusCode != 200 {
-		return errors.New(fmt.Sprintf("Slack response status code: %d", resp.StatusCode))
+		//return errors.New(fmt.Sprintf("Slack response status code: %d", resp.StatusCode))
 	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Slack response: %+v\n", string(body))
 
 	return nil
 }
@@ -91,6 +99,8 @@ func BuildBitBucketMessage(message string) string {
 }
 
 func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
+	slack.Message = message
+
 	repoFullName := os.Getenv("BITBUCKET_REPO_FULL_NAME")
 	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
 	commit := os.Getenv("BITBUCKET_COMMIT")
@@ -98,28 +108,33 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 
 	messageBlock := map[string]any{
 		"type": "section",
-		"text": map[string]any{
-			"type": "mrkdwn",
-			"text": fmt.Sprintf("%s\nRepo: Commit: %s", message, commit),
-		},
-	}
-
-	deviderBlock := map[string]any{
-		"type": "divider",
-	}
-
-	actionBlock := map[string]any{
-		"type": "actions",
-		"elements": []any{
-			map[string]any{
-				"type": "button",
-				"text": fmt.Sprintf("Pipe %s", buildNumber),
-				"url":  fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit),
+		"fields": []map[string]any{
+			{
+				"type": "plain_text",
+				"text": BuildBitBucketMessage(message),
 			},
 		},
 	}
 
-	headerBlcok := map[string]any{
+	deviderBlock := map[string]any{
+		"type": "devider",
+	}
+
+	actionBlock := map[string]any{
+		"type": "actions",
+		"elements": []map[string]any{
+			{
+				"type": "button",
+				"text": map[string]any{
+					"type": "plain_text",
+					"text": fmt.Sprintf("Pipe %s", buildNumber),
+				},
+				"url": fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit),
+			},
+		},
+	}
+
+	headerBlock := map[string]any{
 		"type": "header",
 		"text": map[string]any{
 			"type": "plain_text",
@@ -127,11 +142,19 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 		},
 	}
 
-	slack.Blocks = append(slack.Blocks, headerBlcok)
-	slack.Blocks = append(slack.Blocks, deviderBlock)
+	mainSection := map[string]any{
+		"type": "section",
+		"fields": []any{
+			deviderBlock,
+			headerBlock,
+			actionBlock,
+		},
+	}
+
+	fmt.Println("mainSection", mainSection)
+
 	slack.Blocks = append(slack.Blocks, messageBlock)
-	slack.Blocks = append(slack.Blocks, deviderBlock)
-	slack.Blocks = append(slack.Blocks, actionBlock)
+	//slack.Blocks = append(slack.Blocks, mainSection)
 
 	return slack
 }
