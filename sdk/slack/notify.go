@@ -43,7 +43,10 @@ func (slack *Slack) Notify(message string) error {
 }
 
 func (slack *Slack) NotifyWithBlocks() error {
-	blockJson, err := json.Marshal(slack.Blocks)
+	blockJson, err := json.Marshal(map[string]any{
+		"blocks": slack.Blocks,
+		"text":   "pipeline-hero: successfully pass through",
+	})
 	if err != nil {
 		return err
 	}
