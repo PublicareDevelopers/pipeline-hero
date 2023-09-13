@@ -5,7 +5,6 @@ import (
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/slack"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"math"
 	"os"
 	"os/exec"
 	"regexp"
@@ -69,23 +68,20 @@ var pipeAnalyseCmd = &cobra.Command{
 			os.Exit(255)
 		}
 
-		//round for 2 numbers
-		total = math.Floor((total * 100) / 100)
-
 		if total < BAD {
-			color.Red("coverage is BAD, have %f percent\n", total)
+			color.Red("coverage is BAD, have %.2f  percent\n", total)
 		}
 
 		if total < MEDIUM && total > BAD {
-			color.Yellow("coverage is ok, have %f percent\n", total)
+			color.Yellow("coverage is ok, have %.2f  percent\n", total)
 		}
 
 		if total >= MEDIUM {
-			color.Green("coverage is good, have %f percent\n", total)
+			color.Green("coverage is good, have %.2f  percent\n", total)
 		}
 
 		if total < coverageThreshold {
-			color.Red("coverage threshold not reached\n", total)
+			color.Red("coverage threshold %.2f  not reached, have %.2f \n", coverageThreshold, total)
 			os.Exit(255)
 		}
 
@@ -97,7 +93,7 @@ var pipeAnalyseCmd = &cobra.Command{
 				os.Exit(255)
 			}
 
-			message := slack.BuildBitBucketMessage(fmt.Sprintf("have %f percent coverage\n", total))
+			message := slack.BuildBitBucketMessage(fmt.Sprintf("have %.2f  percent coverage\n", total))
 			err = client.Notify(message)
 			if err != nil {
 				color.Red("Error: %s\n", err)

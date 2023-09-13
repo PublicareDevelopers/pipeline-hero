@@ -20,5 +20,6 @@
 # Go workspace file
 go.work
 
-./idea/
-./DS_Store
+.idea
+.DS_Store
+cover.cov
