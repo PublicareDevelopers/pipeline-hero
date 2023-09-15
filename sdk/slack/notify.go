@@ -133,7 +133,7 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 	}
 
 	headerBlock := map[string]any{
-		"type": "header",
+		"type": "section",
 		"text": map[string]any{
 			"type": "plain_text",
 			"text": fmt.Sprintf("Repo: %s", repoFullName),
