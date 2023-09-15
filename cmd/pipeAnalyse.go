@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/slack"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -114,6 +115,18 @@ var pipeAnalyseCmd = &cobra.Command{
 		if total < coverageThreshold {
 			color.Red("coverage threshold %.2f  not reached, have %.2f \n", coverageThreshold, total)
 			os.Exit(255)
+		}
+
+		dep, err := code.Analyse()
+		if err != nil {
+			//not a crtical error
+			client.Errors = append(client.Errors, err.Error())
+		}
+
+		client.DependencyUpdates = dep
+
+		for _, depUpdate := range dep {
+			color.Yellow("dependency update: %s\n", depUpdate)
 		}
 
 		if useSlack {

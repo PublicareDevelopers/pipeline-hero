@@ -118,20 +118,6 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 		"type": "divider",
 	}
 
-	actionBlock := map[string]any{
-		"type": "actions",
-		"elements": []map[string]any{
-			{
-				"type": "button",
-				"text": map[string]any{
-					"type": "plain_text",
-					"text": fmt.Sprintf("Pipe %s", buildNumber),
-				},
-				"url": fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit),
-			},
-		},
-	}
-
 	repoBlock := map[string]any{
 		"type": "section",
 		"text": map[string]any{
@@ -161,6 +147,35 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 	slack.Blocks = append(slack.Blocks, repoBlock)
 	slack.Blocks = append(slack.Blocks, goVersionBlock)
 	slack.Blocks = append(slack.Blocks, goToolchainVersionBlock)
+
+	for _, dependencyUpdate := range slack.DependencyUpdates {
+		dependencyUpdatesBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf("Update needed: %s", dependencyUpdate),
+			},
+		}
+		slack.Blocks = append(slack.Blocks, dependencyUpdatesBlock)
+	}
+
+	if origin == "" {
+		return slack
+	}
+
+	actionBlock := map[string]any{
+		"type": "actions",
+		"elements": []map[string]any{
+			{
+				"type": "button",
+				"text": map[string]any{
+					"type": "plain_text",
+					"text": fmt.Sprintf("Pipe %s", buildNumber),
+				},
+				"url": fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit),
+			},
+		},
+	}
 	slack.Blocks = append(slack.Blocks, actionBlock)
 
 	return slack
