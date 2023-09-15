@@ -3,6 +3,7 @@ package slack
 type Slack struct {
 	WebhookURL string
 	Message    string
+	GoVersion  string
 	Blocks     []map[string]any
 }
 

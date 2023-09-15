@@ -25,6 +25,8 @@ var pipeAnalyseCmd = &cobra.Command{
 	Short: "",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		client := slack.New()
+
 		out, err := exec.Command("go", "version").Output()
 		if err != nil {
 			color.Red("Error: %s\n", err)
@@ -32,6 +34,7 @@ var pipeAnalyseCmd = &cobra.Command{
 		}
 
 		color.Green("%s\n", out)
+		client.GoVersion = string(out)
 
 		color.Green("setting environment if some arguments are given\n")
 		for key, value := range envVariables {
@@ -100,7 +103,7 @@ var pipeAnalyseCmd = &cobra.Command{
 
 		if useSlack {
 			color.Green("enabling Slack communication\n")
-			client, err := slack.New().InitConfiguration()
+			client, err = client.InitConfiguration()
 			if err != nil {
 				color.Red("Error: %s\n", err)
 				os.Exit(255)

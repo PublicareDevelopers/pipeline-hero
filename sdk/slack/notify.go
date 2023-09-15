@@ -132,7 +132,7 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 		},
 	}
 
-	headerBlock := map[string]any{
+	repoBlock := map[string]any{
 		"type": "section",
 		"text": map[string]any{
 			"type": "plain_text",
@@ -140,20 +140,18 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 		},
 	}
 
-	mainSection := map[string]any{
+	goVersionBlock := map[string]any{
 		"type": "section",
-		"fields": []map[string]any{
-			//deviderBlock,
-			//headerBlock,
-			actionBlock,
+		"text": map[string]any{
+			"type": "plain_text",
+			"text": fmt.Sprintf("Go version OS: %s", slack.GoVersion),
 		},
 	}
 
-	fmt.Println("mainSection", mainSection, deviderBlock, headerBlock, actionBlock)
-
 	slack.Blocks = append(slack.Blocks, messageBlock)
 	slack.Blocks = append(slack.Blocks, deviderBlock)
-	slack.Blocks = append(slack.Blocks, headerBlock)
+	slack.Blocks = append(slack.Blocks, repoBlock)
+	slack.Blocks = append(slack.Blocks, goVersionBlock)
 	slack.Blocks = append(slack.Blocks, actionBlock)
 
 	return slack
