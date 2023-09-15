@@ -36,6 +36,21 @@ var pipeAnalyseCmd = &cobra.Command{
 		color.Green("%s\n", out)
 		client.GoVersion = string(out)
 
+		out, err = exec.Command("go", "mod", "graph").Output()
+		if err != nil {
+			color.Red("Error: %s\n", err)
+			os.Exit(255)
+		}
+
+		//find complete line where toolchain is mentioned
+		reg := regexp.MustCompile(`(.*)toolchain(.*)`)
+		matches := reg.FindStringSubmatch(string(out))
+		if len(matches) > 0 {
+			client.GoToolchainVersion = matches[1]
+			color.Green("%s\n", matches[1])
+
+		}
+
 		color.Green("setting environment if some arguments are given\n")
 		for key, value := range envVariables {
 			err := os.Setenv(key, value)
@@ -70,8 +85,8 @@ var pipeAnalyseCmd = &cobra.Command{
 		//grep the total amount with a regex
 		totalText := string(out)
 
-		reg := regexp.MustCompile(`total:\s+\((\w+)\)\s+(\d+\.\d+)%`)
-		matches := reg.FindStringSubmatch(totalText)
+		reg = regexp.MustCompile(`total:\s+\((\w+)\)\s+(\d+\.\d+)%`)
+		matches = reg.FindStringSubmatch(totalText)
 		if len(matches) != 3 {
 			color.Red("Error: could not find total coverage\n have %s\n", totalText)
 			os.Exit(255)

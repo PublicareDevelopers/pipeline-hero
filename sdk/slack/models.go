@@ -1,10 +1,11 @@
 package slack
 
 type Slack struct {
-	WebhookURL string
-	Message    string
-	GoVersion  string
-	Blocks     []map[string]any
+	WebhookURL         string
+	Message            string
+	GoVersion          string
+	GoToolchainVersion string
+	Blocks             []map[string]any
 }
 
 func New() *Slack {

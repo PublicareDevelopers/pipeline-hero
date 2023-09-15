@@ -148,10 +148,19 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 		},
 	}
 
+	goToolchainVersionBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "plain_text",
+			"text": fmt.Sprintf("Go toolchain version: %s", slack.GoToolchainVersion),
+		},
+	}
+
 	slack.Blocks = append(slack.Blocks, messageBlock)
 	slack.Blocks = append(slack.Blocks, deviderBlock)
 	slack.Blocks = append(slack.Blocks, repoBlock)
 	slack.Blocks = append(slack.Blocks, goVersionBlock)
+	slack.Blocks = append(slack.Blocks, goToolchainVersionBlock)
 	slack.Blocks = append(slack.Blocks, actionBlock)
 
 	return slack
