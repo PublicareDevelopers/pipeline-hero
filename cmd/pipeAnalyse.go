@@ -117,7 +117,7 @@ var pipeAnalyseCmd = &cobra.Command{
 			os.Exit(255)
 		}
 
-		dep, err := code.Analyse()
+		dep, err := code.CheckDependencies()
 		if err != nil {
 			//not a crtical error
 			client.Errors = append(client.Errors, err.Error())
@@ -128,6 +128,15 @@ var pipeAnalyseCmd = &cobra.Command{
 		for _, depUpdate := range dep {
 			color.Yellow("dependency update: %s\n", depUpdate)
 		}
+
+		var vulCheck string
+		vulCheck, err = code.VulCheck()
+		if err != nil {
+			//not a crtical error
+			client.Errors = append(client.Errors, err.Error())
+		}
+
+		client.VulCheck = vulCheck
 
 		if useSlack {
 			color.Green("enabling Slack communication\n")

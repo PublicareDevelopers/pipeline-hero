@@ -6,6 +6,7 @@ type Slack struct {
 	GoVersion          string
 	GoToolchainVersion string
 	DependencyUpdates  []string
+	VulCheck           string
 	Errors             []string
 	Blocks             []map[string]any
 }

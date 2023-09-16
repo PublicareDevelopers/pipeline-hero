@@ -7,7 +7,9 @@ import (
 	"regexp"
 )
 
-func Analyse() ([]string, error) {
+func CheckDependencies() ([]string, error) {
+	scanned := make(map[string]bool)
+
 	graph, err := exec.Command("go", "mod", "graph").Output()
 	if err != nil {
 		return nil, err
@@ -24,6 +26,13 @@ func Analyse() ([]string, error) {
 		//split the line by empty space
 		words := bytes.Split(line, []byte(" "))
 		original := string(words[0])
+
+		if _, ok := scanned[original]; ok {
+			continue
+		}
+
+		scanned[original] = true
+
 		out, err := exec.Command("go", "list", "-m", "-u", original).Output()
 		if err != nil {
 			fmt.Printf("Error: %s\n", err)

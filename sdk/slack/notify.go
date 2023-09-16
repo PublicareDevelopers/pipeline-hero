@@ -148,16 +148,34 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 	slack.Blocks = append(slack.Blocks, goVersionBlock)
 	slack.Blocks = append(slack.Blocks, goToolchainVersionBlock)
 
-	for _, dependencyUpdate := range slack.DependencyUpdates {
-		dependencyUpdatesBlock := map[string]any{
-			"type": "section",
-			"text": map[string]any{
-				"type": "mrkdwn",
-				"text": fmt.Sprintf("Update needed: %s", dependencyUpdate),
-			},
-		}
-		slack.Blocks = append(slack.Blocks, dependencyUpdatesBlock)
+	dependencyUpdatesMsg := "no dependency updates needed"
+	if len(slack.DependencyUpdates) > 0 {
+		dependencyUpdatesMsg = "dependency updates needed: \n" + fmt.Sprintf("%s", slack.DependencyUpdates)
 	}
+
+	if len(slack.DependencyUpdates) > 10 {
+		dependencyUpdatesMsg = "dependency updates needed: \n" + fmt.Sprintf("%s", slack.DependencyUpdates[:10]) + "\n...\n" +
+			fmt.Sprintf("total of %d updates; have a look at the pipe", len(slack.DependencyUpdates))
+	}
+
+	dependencyUpdatesBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "Plain_text",
+			"text": dependencyUpdatesMsg,
+		},
+	}
+	slack.Blocks = append(slack.Blocks, dependencyUpdatesBlock)
+
+	vulCheckBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "Plain_text",
+			"text": slack.VulCheck,
+		},
+	}
+
+	slack.Blocks = append(slack.Blocks, vulCheckBlock)
 
 	if origin == "" {
 		return slack
