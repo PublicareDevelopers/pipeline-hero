@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+var maxLengthDepUpdates = 40
+
 func (slack *Slack) Notify(message string) error {
 	reader := bytes.NewReader([]byte(fmt.Sprintf(
 		`{"text":"%s"}`,
@@ -149,11 +151,14 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 	slack.Blocks = append(slack.Blocks, goToolchainVersionBlock)
 
 	dependencyUpdatesMsg := "no dependency updates needed"
-	if len(slack.DependencyUpdates) > 0 {
-		dependencyUpdatesMsg = "dependency updates needed: \n" + fmt.Sprintf("%s", slack.DependencyUpdates)
+	if len(slack.DependencyUpdates) > 0 && len(slack.DependencyUpdates) <= maxLengthDepUpdates {
+		dependencyUpdatesMsg = "dependency updates needed: \n"
+		for _, depUpdate := range slack.DependencyUpdates[:maxLengthDepUpdates] {
+			dependencyUpdatesMsg += fmt.Sprintf("%s\n", depUpdate)
+		}
 	}
 
-	if len(slack.DependencyUpdates) > 40 {
+	if len(slack.DependencyUpdates) > maxLengthDepUpdates {
 		dependencyUpdatesMsg = "dependency updates needed: \n" + fmt.Sprintf("%s", slack.DependencyUpdates[:40]) + "\n...\n" +
 			fmt.Sprintf("total of %d updates; have a look at the pipe", len(slack.DependencyUpdates))
 	}
@@ -167,15 +172,16 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 	}
 	slack.Blocks = append(slack.Blocks, dependencyUpdatesBlock)
 
-	vulCheckBlock := map[string]any{
-		"type": "section",
-		"text": map[string]any{
-			"type": "plain_text",
-			"text": slack.VulCheck,
-		},
+	if slack.VulCheck != "" {
+		vulCheckBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "plain_text",
+				"text": slack.VulCheck,
+			},
+		}
+		slack.Blocks = append(slack.Blocks, vulCheckBlock)
 	}
-
-	slack.Blocks = append(slack.Blocks, vulCheckBlock)
 
 	if origin == "" {
 		return slack
