@@ -153,8 +153,8 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 		dependencyUpdatesMsg = "dependency updates needed: \n" + fmt.Sprintf("%s", slack.DependencyUpdates)
 	}
 
-	if len(slack.DependencyUpdates) > 10 {
-		dependencyUpdatesMsg = "dependency updates needed: \n" + fmt.Sprintf("%s", slack.DependencyUpdates[:10]) + "\n...\n" +
+	if len(slack.DependencyUpdates) > 40 {
+		dependencyUpdatesMsg = "dependency updates needed: \n" + fmt.Sprintf("%s", slack.DependencyUpdates[:40]) + "\n...\n" +
 			fmt.Sprintf("total of %d updates; have a look at the pipe", len(slack.DependencyUpdates))
 	}
 
@@ -170,7 +170,7 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 	vulCheckBlock := map[string]any{
 		"type": "section",
 		"text": map[string]any{
-			"type": "Plain_text",
+			"type": "plain_text",
 			"text": slack.VulCheck,
 		},
 	}
