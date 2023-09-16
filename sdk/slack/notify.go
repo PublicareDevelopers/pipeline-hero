@@ -161,7 +161,7 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 	dependencyUpdatesBlock := map[string]any{
 		"type": "section",
 		"text": map[string]any{
-			"type": "Plain_text",
+			"type": "plain_text",
 			"text": dependencyUpdatesMsg,
 		},
 	}
