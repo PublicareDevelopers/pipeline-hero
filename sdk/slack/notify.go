@@ -183,6 +183,22 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 		slack.Blocks = append(slack.Blocks, vulCheckBlock)
 	}
 
+	if len(slack.Errors) > 0 {
+		msg := "Errors:\n"
+		for _, err := range slack.Errors {
+			msg += fmt.Sprintf("%s\n", err)
+		}
+
+		errorsBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "plain_text",
+				"text": msg,
+			},
+		}
+		slack.Blocks = append(slack.Blocks, errorsBlock)
+	}
+
 	if origin == "" {
 		return slack
 	}
