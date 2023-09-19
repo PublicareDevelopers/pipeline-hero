@@ -153,7 +153,7 @@ func (slack *Slack) BuildBlocksByBitbucket(message string) *Slack {
 	dependencyUpdatesMsg := "no dependency updates needed"
 	if len(slack.DependencyUpdates) > 0 && len(slack.DependencyUpdates) <= maxLengthDepUpdates {
 		dependencyUpdatesMsg = "dependency updates needed: \n"
-		for _, depUpdate := range slack.DependencyUpdates[:maxLengthDepUpdates] {
+		for _, depUpdate := range slack.DependencyUpdates {
 			dependencyUpdatesMsg += fmt.Sprintf("%s\n", depUpdate)
 		}
 	}
