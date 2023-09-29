@@ -91,22 +91,7 @@ var pipeAnalyseCmd = &cobra.Command{
 
 		analyser.SetCoverageByTotal(totalText)
 
-		if analyser.Coverage < BAD {
-			color.Red("coverage is BAD, have %.2f  percent\n", analyser.Coverage)
-		}
-
-		if analyser.Coverage < MEDIUM && analyser.Coverage > BAD {
-			color.Yellow("coverage is ok, have %.2f  percent\n", analyser.Coverage)
-		}
-
-		if analyser.Coverage >= MEDIUM {
-			color.Green("coverage is good, have %.2f  percent\n", analyser.Coverage)
-		}
-
-		if analyser.Coverage < coverageThreshold {
-			color.Red("coverage threshold %.2f  not reached, have %.2f \n", coverageThreshold, analyser.Coverage)
-			os.Exit(255)
-		}
+		fmt.Println(analyser.GetCoverageInterpretation())
 
 		dep, err := code.CheckDependencies()
 		if err != nil {
