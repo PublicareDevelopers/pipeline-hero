@@ -53,3 +53,26 @@ func TestAnalyser_SetDependencyGraph(t *testing.T) {
 	}
 
 }
+
+func TestAnalyser_GetUpdatableDependencies(t *testing.T) {
+	a := NewAnalyser()
+
+	a.dependencies = append(a.dependencies, Dependency{
+		From:      "github.com/PublicareDevelopers/pipeline-hero",
+		To:        "github.com/fatih/color@v1.15.0",
+		Updatable: true,
+		UpdateTo:  "v1.15.1",
+	})
+
+	a.dependencies = append(a.dependencies, Dependency{
+		From:      "github.com/PublicareDevelopers/pipeline-hero",
+		To:        "github.com/inconshreveable/mousetrap@v1.1.0",
+		Updatable: false,
+		UpdateTo:  "",
+	})
+
+	updateable := a.GetUpdatableDependencies()
+	if len(updateable) != 1 {
+		t.Errorf("GetUpdatableDependencies() = %v, want %v", len(updateable), 1)
+	}
+}

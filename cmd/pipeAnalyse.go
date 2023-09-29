@@ -43,6 +43,8 @@ var pipeAnalyseCmd = &cobra.Command{
 			os.Exit(255)
 		}
 
+		analyser.SetDependencyGraph(dependencyGraph)
+
 		toolchain, err := analyser.GetToolChainByDependencyGraph(dependencyGraph)
 		if err != nil {
 			color.Red("Error: %s\n", err)
@@ -91,18 +93,10 @@ var pipeAnalyseCmd = &cobra.Command{
 
 		analyser.SetCoverageByTotal(totalText)
 
-		fmt.Println(analyser.GetCoverageInterpretation())
+		dependencyUpdates := analyser.GetUpdatableDependencies()
 
-		dep, err := code.CheckDependencies()
-		if err != nil {
-			//not a crtical error
-			client.Errors = append(client.Errors, err.Error())
-		}
-
-		client.DependencyUpdates = dep
-
-		for _, depUpdate := range dep {
-			color.Yellow("dependency update: %s\n", depUpdate)
+		for _, depUpdate := range dependencyUpdates {
+			color.Yellow("dependency update from %s to %s\n", depUpdate.From, depUpdate.UpdateTo)
 		}
 
 		var vulCheck string

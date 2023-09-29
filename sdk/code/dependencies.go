@@ -9,6 +9,17 @@ import (
 	"strings"
 )
 
+func (a *Analyser) GetUpdatableDependencies() []Dependency {
+	updatable := make([]Dependency, 0)
+	for _, dependency := range a.dependencies {
+		if dependency.Updatable {
+			updatable = append(updatable, dependency)
+		}
+	}
+
+	return updatable
+}
+
 func (a *Analyser) parseDependencyGraph() {
 	for _, line := range strings.Split(a.DependencyGraph, "\n") {
 		if len(line) == 0 {
