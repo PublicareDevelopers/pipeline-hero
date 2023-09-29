@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-func TestAnalyser_SetCoverageByTotal(t *testing.T) {
+func TestAnalyser_SetThreshold(t *testing.T) {
 	type args struct {
-		totalText string
+		threshold float64
 	}
 	tests := []struct {
 		name string
@@ -15,40 +15,26 @@ func TestAnalyser_SetCoverageByTotal(t *testing.T) {
 		want float64
 	}{
 		{
-			name: "Test SetCoverageByTotal",
+			name: "Test SetThreshold",
 			args: args{
-				totalText: "total: (statements) 100.0%",
+				threshold: 75.0,
 			},
-			want: 100.0,
+			want: 75.0,
 		},
 		{
-			name: "Test SetCoverageByTotal",
+			name: "Test SetThreshold",
 			args: args{
-				totalText: "total: (statements) 93.84%",
+				threshold: 50.0,
 			},
-			want: 93.84,
-		},
-		{
-			name: "Test SetCoverageByTotal",
-			args: args{
-				totalText: "total: (statements) 0.0%",
-			},
-			want: 0.0,
-		},
-		{
-			name: "Test SetCoverageByTotal",
-			args: args{
-				totalText: "total: nonsens",
-			},
-			want: 0.0,
+			want: 50.0,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			a := NewAnalyser()
-			a.SetCoverageByTotal(tt.args.totalText)
-			if got := a.Coverage; !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SetCoverageByTotal() = %v, want %v", got, tt.want)
+			a := NewAnalyser().SetThreshold(tt.args.threshold)
+
+			if got := a.Threshold; !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("SetThreshold() = %v, want %v", got, tt.want)
 			}
 		})
 	}

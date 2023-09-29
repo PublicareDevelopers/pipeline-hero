@@ -9,8 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
-	"regexp"
-	"strconv"
 )
 
 const BAD = 50.0
@@ -28,7 +26,7 @@ var pipeAnalyseCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := slack.New()
-		analyser := code.NewAnalyser()
+		analyser := code.NewAnalyser().SetThreshold(coverageThreshold)
 
 		version, err := cmds.GetVersion()
 		if err != nil {
@@ -87,42 +85,26 @@ var pipeAnalyseCmd = &cobra.Command{
 			os.Exit(255)
 		}
 
-		coverage := string(out)
-
-		fmt.Println(coverage)
-
 		//we have something like total:  (statements)    0.0%
 		//grep the total amount with a regex
 		totalText := string(out)
 
-		reg := regexp.MustCompile(`total:\s+\((\w+)\)\s+(\d+\.\d+)%`)
-		matches := reg.FindStringSubmatch(totalText)
-		if len(matches) != 3 {
-			color.Red("Error: could not find total coverage\n have %s\n", totalText)
-			os.Exit(255)
+		analyser.SetCoverageByTotal(totalText)
+
+		if analyser.Coverage < BAD {
+			color.Red("coverage is BAD, have %.2f  percent\n", analyser.Coverage)
 		}
 
-		//convert to a float
-		total, err := strconv.ParseFloat(matches[2], 64)
-		if err != nil {
-			color.Red("Error: %s\n", err)
-			os.Exit(255)
+		if analyser.Coverage < MEDIUM && analyser.Coverage > BAD {
+			color.Yellow("coverage is ok, have %.2f  percent\n", analyser.Coverage)
 		}
 
-		if total < BAD {
-			color.Red("coverage is BAD, have %.2f  percent\n", total)
+		if analyser.Coverage >= MEDIUM {
+			color.Green("coverage is good, have %.2f  percent\n", analyser.Coverage)
 		}
 
-		if total < MEDIUM && total > BAD {
-			color.Yellow("coverage is ok, have %.2f  percent\n", total)
-		}
-
-		if total >= MEDIUM {
-			color.Green("coverage is good, have %.2f  percent\n", total)
-		}
-
-		if total < coverageThreshold {
-			color.Red("coverage threshold %.2f  not reached, have %.2f \n", coverageThreshold, total)
+		if analyser.Coverage < coverageThreshold {
+			color.Red("coverage threshold %.2f  not reached, have %.2f \n", coverageThreshold, analyser.Coverage)
 			os.Exit(255)
 		}
 
@@ -155,7 +137,7 @@ var pipeAnalyseCmd = &cobra.Command{
 				os.Exit(255)
 			}
 
-			err = client.BuildBlocksByBitbucket(fmt.Sprintf("have %.2f  percent coverage\n", total)).
+			err = client.BuildBlocksByBitbucket(fmt.Sprintf("have %.2f  percent coverage\n", analyser.Coverage)).
 				NotifyWithBlocks()
 
 			if err != nil {
