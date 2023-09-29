@@ -5,7 +5,26 @@ import (
 	"fmt"
 	"os/exec"
 	"regexp"
+	"strings"
 )
+
+func (a *Analyser) parseDependencyGraph() {
+	for _, line := range strings.Split(a.DependencyGraph, "\n") {
+		if len(line) == 0 {
+			continue
+		}
+
+		words := strings.Split(line, " ")
+		original := words[0]
+		dependency := words[1]
+
+		a.dependencies = append(a.dependencies, Dependency{
+			From:      original,
+			To:        dependency,
+			Updatable: false,
+		})
+	}
+}
 
 func CheckDependencies() ([]string, error) {
 	scanned := make(map[string]bool)
