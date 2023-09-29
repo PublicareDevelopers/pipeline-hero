@@ -34,7 +34,7 @@ func (a *Analyser) parseDependencyGraph() {
 		updatable := false
 		updateTo := ""
 
-		update, err := cmds.GetUpdateVersion(original)
+		update, err := cmds.GetUpdateVersion(dependency)
 		if err == nil {
 			updatable = update != ""
 			updateTo = update

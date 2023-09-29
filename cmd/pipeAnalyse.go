@@ -96,7 +96,7 @@ var pipeAnalyseCmd = &cobra.Command{
 		dependencyUpdates := analyser.GetUpdatableDependencies()
 
 		for _, depUpdate := range dependencyUpdates {
-			color.Yellow("dependency update from %s to %s\n", depUpdate.From, depUpdate.UpdateTo)
+			color.Yellow("dependency update from %s to %s\n", depUpdate.To, depUpdate.UpdateTo)
 		}
 
 		var vulCheck string
