@@ -28,6 +28,7 @@ var pipeAnalyseCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := slack.New()
+		analyser := code.NewAnalyser()
 
 		version, err := cmds.GetVersion()
 		if err != nil {
@@ -44,14 +45,14 @@ var pipeAnalyseCmd = &cobra.Command{
 			os.Exit(255)
 		}
 
-		//find complete line where toolchain is mentioned
-		reg := regexp.MustCompile(`(.*)toolchain(.*)`)
-		matches := reg.FindStringSubmatch(dependencyGraph)
-		if len(matches) > 0 {
-			client.GoToolchainVersion = matches[1]
-			color.Green("%s\n", matches[1])
-
+		toolchain, err := analyser.GetToolChainByDependencyGraph(dependencyGraph)
+		if err != nil {
+			color.Red("Error: %s\n", err)
+			os.Exit(255)
 		}
+
+		client.GoToolchainVersion = toolchain
+		color.Green("%s\n", toolchain)
 
 		color.Green("setting environment if some arguments are given\n")
 		for key, value := range envVariables {
@@ -83,12 +84,16 @@ var pipeAnalyseCmd = &cobra.Command{
 			os.Exit(255)
 		}
 
+		fmt.Println("coverage start")
+		fmt.Println(string(out))
+		fmt.Println("coverage end")
+
 		//we have something like total:  (statements)    0.0%
 		//grep the total amount with a regex
 		totalText := string(out)
 
-		reg = regexp.MustCompile(`total:\s+\((\w+)\)\s+(\d+\.\d+)%`)
-		matches = reg.FindStringSubmatch(totalText)
+		reg := regexp.MustCompile(`total:\s+\((\w+)\)\s+(\d+\.\d+)%`)
+		matches := reg.FindStringSubmatch(totalText)
 		if len(matches) != 3 {
 			color.Red("Error: could not find total coverage\n have %s\n", totalText)
 			os.Exit(255)
