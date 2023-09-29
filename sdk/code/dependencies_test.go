@@ -17,4 +17,39 @@ func TestAnalyser_SetDependencyGraph(t *testing.T) {
 	if len(a.dependencies) != len(lines) {
 		t.Errorf("SetDependencyGraph() = %v, want %v", len(a.dependencies), len(lines))
 	}
+
+	dependency := a.dependencies[0]
+	if dependency.From != "github.com/PublicareDevelopers/pipeline-hero" {
+		t.Errorf("SetDependencyGraph() = %v, want %v", dependency.From, "github.com/PublicareDevelopers/pipeline-hero")
+	}
+
+	if dependency.To != "github.com/fatih/color@v1.15.0" {
+		t.Errorf("SetDependencyGraph() = %v, want %v", dependency.To, "github.com/fatih/color@v1.15.0")
+	}
+
+	dependency = a.dependencies[11]
+	if dependency.From != "github.com/mattn/go-isatty@v0.0.19" {
+		t.Errorf("SetDependencyGraph() = %v, want %v", dependency.From, "github.com/mattn/go-isatty@v0.0.19")
+	}
+
+	if dependency.To != "golang.org/x/sys@v0.6.0" {
+		t.Errorf("SetDependencyGraph() = %v, want %v", dependency.To, "golang.org/x/sys@v0.6.0")
+	}
+
+	for _, dep := range a.dependencies {
+		if dep.Updatable {
+			if dep.UpdateTo == "" {
+				t.Errorf("SetDependencyGraph() = %v, want a value", dep.UpdateTo)
+			}
+
+			if strings.Contains(dep.UpdateTo, "[") {
+				t.Errorf("SetDependencyGraph() = %v, want a value without [", dep.UpdateTo)
+			}
+
+			if strings.Contains(dep.UpdateTo, "]") {
+				t.Errorf("SetDependencyGraph() = %v, want a value without ]", dep.UpdateTo)
+			}
+		}
+	}
+
 }

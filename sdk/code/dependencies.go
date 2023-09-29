@@ -3,6 +3,7 @@ package code
 import (
 	"bytes"
 	"fmt"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -13,15 +14,26 @@ func (a *Analyser) parseDependencyGraph() {
 		if len(line) == 0 {
 			continue
 		}
+		line = strings.Trim(line, " ")
 
 		words := strings.Split(line, " ")
 		original := words[0]
 		dependency := words[1]
 
+		updatable := false
+		updateTo := ""
+
+		update, err := cmds.GetUpdateVersion(original)
+		if err == nil {
+			updatable = update != ""
+			updateTo = update
+		}
+
 		a.dependencies = append(a.dependencies, Dependency{
 			From:      original,
 			To:        dependency,
-			Updatable: false,
+			Updatable: updatable,
+			UpdateTo:  updateTo,
 		})
 	}
 }
