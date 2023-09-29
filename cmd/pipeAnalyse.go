@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/slack"
 	"github.com/fatih/color"
@@ -28,16 +29,16 @@ var pipeAnalyseCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := slack.New()
 
-		out, err := exec.Command("go", "version").Output()
+		version, err := cmds.GetVersion()
 		if err != nil {
 			color.Red("Error: %s\n", err)
 			os.Exit(255)
 		}
 
-		color.Green("%s\n", out)
-		client.GoVersion = string(out)
+		color.Green("%s\n", version)
+		client.GoVersion = version
 
-		out, err = exec.Command("go", "mod", "graph").Output()
+		dependencyGraph, err := cmds.GetDependencyGraph()
 		if err != nil {
 			color.Red("Error: %s\n", err)
 			os.Exit(255)
@@ -45,7 +46,7 @@ var pipeAnalyseCmd = &cobra.Command{
 
 		//find complete line where toolchain is mentioned
 		reg := regexp.MustCompile(`(.*)toolchain(.*)`)
-		matches := reg.FindStringSubmatch(string(out))
+		matches := reg.FindStringSubmatch(dependencyGraph)
 		if len(matches) > 0 {
 			client.GoToolchainVersion = matches[1]
 			color.Green("%s\n", matches[1])
@@ -64,7 +65,7 @@ var pipeAnalyseCmd = &cobra.Command{
 		}
 
 		color.Green("\nrunning tests\n")
-		out, err = exec.Command("go", "test", testSetup, fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
+		out, err := exec.Command("go", "test", testSetup, fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
 		if err != nil {
 			fmt.Printf("%s\n", string(out))
 			color.Red("Error: %s\n", err)
