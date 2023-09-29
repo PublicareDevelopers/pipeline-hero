@@ -73,7 +73,10 @@ var pipeAnalyseCmd = &cobra.Command{
 			os.Exit(255)
 		}
 
-		fmt.Println(string(out))
+		coverProfile := string(out)
+		analyser.SetCoverProfile(coverProfile)
+
+		fmt.Println(coverProfile)
 		color.Green("running coverage\n")
 
 		//go tool cover -func=cover.cov | tee coverage.txt
@@ -84,9 +87,9 @@ var pipeAnalyseCmd = &cobra.Command{
 			os.Exit(255)
 		}
 
-		fmt.Println("coverage start")
-		fmt.Println(string(out))
-		fmt.Println("coverage end")
+		coverage := string(out)
+
+		fmt.Println(coverage)
 
 		//we have something like total:  (statements)    0.0%
 		//grep the total amount with a regex
