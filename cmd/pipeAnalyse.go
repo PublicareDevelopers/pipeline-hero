@@ -93,6 +93,8 @@ var pipeAnalyseCmd = &cobra.Command{
 
 		analyser.SetCoverageByTotal(totalText)
 
+		fmt.Println(analyser.GetCoverageInterpretation())
+
 		dependencyUpdates := analyser.GetUpdatableDependencies()
 
 		for _, depUpdate := range dependencyUpdates {
