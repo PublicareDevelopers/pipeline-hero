@@ -13,5 +13,7 @@ func (a *Analyser) GetToolChainByDependencyGraph(dependencyGraph string) (string
 		return a.Toolchain, nil
 	}
 
-	return "no toolchain found", nil
+	a.Toolchain = "no toolchain found"
+
+	return a.Toolchain, nil
 }

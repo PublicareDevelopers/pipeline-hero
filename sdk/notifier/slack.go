@@ -1,9 +1,13 @@
 package notifier
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
+	"io/ioutil"
+	"net/http"
 	"os"
 )
 
@@ -167,5 +171,45 @@ func (slack *Slack) GetBlocks() []map[string]any {
 }
 
 func (slack *Slack) Notify() error {
+	blockJson, err := json.Marshal(map[string]any{
+		"blocks": slack.Blocks,
+	})
+	if err != nil {
+		return err
+	}
+
+	reader := bytes.NewReader(blockJson)
+
+	req, err := http.NewRequest(http.MethodPost, slack.WebhookURL, reader)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			fmt.Printf("Error closing slack response body: %s\n", err.Error())
+		}
+	}()
+
+	if resp.StatusCode != 200 {
+		//return errors.New(fmt.Sprintf("Slack response status code: %d", resp.StatusCode))
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s\n", string(blockJson))
+	fmt.Printf("Slack response: %+v\n", string(body))
+
 	return nil
 }

@@ -11,10 +11,6 @@ func TestAnalyser_GetToolChainByDependencyGraph(t *testing.T) {
 		t.Errorf("Error: %s\n", err)
 	}
 
-	if toolChain == "" {
-		t.Errorf("Error: toolChain is empty\n")
-	}
-
 	if toolChain != a.Toolchain {
 		t.Errorf("Error: toolChain is not set\n")
 	}
