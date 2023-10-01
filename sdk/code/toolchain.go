@@ -9,7 +9,8 @@ func (a *Analyser) GetToolChainByDependencyGraph(dependencyGraph string) (string
 	matches := reg.FindStringSubmatch(dependencyGraph)
 
 	if len(matches) > 0 {
-		return matches[1], nil
+		a.Toolchain = matches[1]
+		return a.Toolchain, nil
 	}
 
 	return "no toolchain found", nil

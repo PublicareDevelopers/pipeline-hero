@@ -7,5 +7,6 @@ import (
 type Client interface {
 	Validate() error
 	BuildBlocks(analyser *code.Analyser) error
+	GetBlocks() []map[string]any
 	Notify() error
 }

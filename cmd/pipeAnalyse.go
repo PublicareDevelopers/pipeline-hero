@@ -33,6 +33,8 @@ var pipeAnalyseCmd = &cobra.Command{
 			os.Exit(255)
 		}
 
+		analyser.SetGoVersion(version)
+
 		color.Green("%s\n", version)
 
 		dependencyGraph, err := cmds.GetDependencyGraph()
@@ -92,6 +94,12 @@ var pipeAnalyseCmd = &cobra.Command{
 
 		fmt.Println(analyser.GetCoverageInterpretation())
 
+		err = analyser.CheckThreshold()
+		if err != nil {
+			color.Red("%s\n", err)
+			os.Exit(255)
+		}
+
 		dependencyUpdates := analyser.GetUpdatableDependencies()
 
 		for _, depUpdate := range dependencyUpdates {
@@ -103,6 +111,7 @@ var pipeAnalyseCmd = &cobra.Command{
 		if err != nil {
 			//not a crtical error
 			fmt.Println(err)
+			analyser.PushError(err.Error())
 		}
 
 		fmt.Println(vulCheck)

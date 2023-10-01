@@ -47,3 +47,35 @@ func TestAnalyser_SetVulnCheck(t *testing.T) {
 		t.Errorf("SetVulnCheck() = %v, want %v", a.VulnCheck, "trivy")
 	}
 }
+
+func TestAnalyser_SetGoVersion(t *testing.T) {
+	a := NewAnalyser().SetGoVersion("1.14.1")
+
+	if a.GoVersion != "1.14.1" {
+		t.Errorf("SetGoVersion() = %v, want %v", a.GoVersion, "1.14.1")
+	}
+}
+
+func TestAnalyser_PushError(t *testing.T) {
+	a := NewAnalyser()
+
+	if len(a.errors) != 0 {
+		t.Errorf("PushError() = %v, want %v", len(a.errors), 0)
+	}
+
+	a.PushError("error 1")
+
+	if len(a.errors) != 1 {
+		t.Errorf("PushError() = %v, want %v", len(a.errors), 1)
+	}
+
+	errors := a.GetErrors()
+
+	if len(errors) != 1 {
+		t.Errorf("GetErrors() = %v, want %v", len(errors), 1)
+	}
+
+	if errors[0] != "error 1" {
+		t.Errorf("GetErrors() = %v, want %v", errors[0], "error 1")
+	}
+}
