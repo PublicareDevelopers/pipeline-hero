@@ -39,3 +39,11 @@ func TestAnalyser_SetThreshold(t *testing.T) {
 		})
 	}
 }
+
+func TestAnalyser_SetVulnCheck(t *testing.T) {
+	a := NewAnalyser().SetVulnCheck("trivy")
+
+	if a.VulnCheck != "trivy" {
+		t.Errorf("SetVulnCheck() = %v, want %v", a.VulnCheck, "trivy")
+	}
+}

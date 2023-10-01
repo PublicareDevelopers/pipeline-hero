@@ -5,6 +5,7 @@ type Analyser struct {
 	Coverage        float64
 	CoverProfile    string
 	DependencyGraph string
+	VulnCheck       string
 	profiles        []Profile
 	dependencies    []Dependency
 }
@@ -44,5 +45,10 @@ func (a *Analyser) SetCoverProfile(coverProfile string) *Analyser {
 func (a *Analyser) SetDependencyGraph(dependencyGraph string) *Analyser {
 	a.DependencyGraph = dependencyGraph
 	a.parseDependencyGraph()
+	return a
+}
+
+func (a *Analyser) SetVulnCheck(vulnCheck string) *Analyser {
+	a.VulnCheck = vulnCheck
 	return a
 }

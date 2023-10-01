@@ -4,9 +4,6 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -16,25 +13,7 @@ var localScanCmd = &cobra.Command{
 	Short: "",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		color.Green("scanning dependencies\n")
-		dep, err := code.CheckDependencies()
-		if err != nil {
-			color.Red("Error: %s\n", err)
-		}
 
-		for _, depUpdate := range dep {
-			color.Yellow("dependency update: %s\n", depUpdate)
-		}
-
-		color.Green("checking for vulnerabilities\n")
-		var vulCheck string
-		vulCheck, err = code.VulCheck()
-		if err != nil {
-			//not a crtical error
-			color.Red("Error: %s\n", err)
-		}
-
-		fmt.Println(vulCheck)
 	},
 }
 

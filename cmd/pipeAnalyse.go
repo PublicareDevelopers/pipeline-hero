@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/slack"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/notifier"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
@@ -25,7 +25,6 @@ var pipeAnalyseCmd = &cobra.Command{
 	Short: "",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := slack.New()
 		analyser := code.NewAnalyser().SetThreshold(coverageThreshold)
 
 		version, err := cmds.GetVersion()
@@ -35,7 +34,6 @@ var pipeAnalyseCmd = &cobra.Command{
 		}
 
 		color.Green("%s\n", version)
-		client.GoVersion = version
 
 		dependencyGraph, err := cmds.GetDependencyGraph()
 		if err != nil {
@@ -51,7 +49,6 @@ var pipeAnalyseCmd = &cobra.Command{
 			os.Exit(255)
 		}
 
-		client.GoToolchainVersion = toolchain
 		color.Green("%s\n", toolchain)
 
 		color.Green("setting environment if some arguments are given\n")
@@ -102,25 +99,36 @@ var pipeAnalyseCmd = &cobra.Command{
 		}
 
 		var vulCheck string
-		vulCheck, err = code.VulCheck()
+		vulCheck, err = cmds.VulnCheck(testSetup)
 		if err != nil {
 			//not a crtical error
-			client.Errors = append(client.Errors, err.Error())
+			fmt.Println(err)
 		}
 
-		client.VulCheck = vulCheck
+		fmt.Println(vulCheck)
+		analyser.SetVulnCheck(vulCheck)
 
 		if useSlack {
 			color.Green("enabling Slack communication\n")
-			client, err = client.InitConfiguration()
+			handler, err := notifier.New("slack")
 			if err != nil {
 				color.Red("Error: %s\n", err)
 				os.Exit(255)
 			}
 
-			err = client.BuildBlocksByBitbucket(fmt.Sprintf("have %.2f  percent coverage\n", analyser.Coverage)).
-				NotifyWithBlocks()
+			err = handler.Client.Validate()
+			if err != nil {
+				color.Red("Error: %s\n", err)
+				os.Exit(255)
+			}
 
+			err = handler.Client.BuildBlocks(analyser)
+			if err != nil {
+				color.Red("Error: %s\n", err)
+				os.Exit(255)
+			}
+
+			err = handler.Client.Notify()
 			if err != nil {
 				color.Red("Error: %s\n", err)
 				os.Exit(255)
