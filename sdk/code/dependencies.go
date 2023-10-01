@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+var maxDependencyChecks = 60
+
 func (a *Analyser) GetUpdatableDependencies() []Dependency {
 	updatable := make([]Dependency, 0)
 	for _, dependency := range a.dependencies {
@@ -17,7 +19,7 @@ func (a *Analyser) GetUpdatableDependencies() []Dependency {
 }
 
 func (a *Analyser) parseDependencyGraph() {
-	for _, line := range strings.Split(a.DependencyGraph, "\n") {
+	for count, line := range strings.Split(a.DependencyGraph, "\n") {
 		if len(line) == 0 {
 			continue
 		}
@@ -30,10 +32,12 @@ func (a *Analyser) parseDependencyGraph() {
 		updatable := false
 		updateTo := ""
 
-		update, err := cmds.GetUpdateVersion(dependency)
-		if err == nil {
-			updatable = update != ""
-			updateTo = update
+		if count < maxDependencyChecks {
+			update, err := cmds.GetUpdateVersion(dependency)
+			if err == nil {
+				updatable = update != ""
+				updateTo = update
+			}
 		}
 
 		a.dependencies = append(a.dependencies, Dependency{

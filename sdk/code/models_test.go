@@ -79,3 +79,27 @@ func TestAnalyser_PushError(t *testing.T) {
 		t.Errorf("GetErrors() = %v, want %v", errors[0], "error 1")
 	}
 }
+
+func TestAnalyser_PushWarning(t *testing.T) {
+	a := NewAnalyser()
+
+	if len(a.warnings) != 0 {
+		t.Errorf("PushError() = %v, want %v", len(a.warnings), 0)
+	}
+
+	a.PushWarning("warning 1")
+
+	if len(a.warnings) != 1 {
+		t.Errorf("PushError() = %v, want %v", len(a.warnings), 1)
+	}
+
+	warnings := a.GetWarnings()
+
+	if len(warnings) != 1 {
+		t.Errorf("GetErrors() = %v, want %v", len(warnings), 1)
+	}
+
+	if warnings[0] != "error 1" {
+		t.Errorf("GetErrors() = %v, want %v", warnings[0], "error 1")
+	}
+}

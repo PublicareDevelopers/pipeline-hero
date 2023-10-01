@@ -9,6 +9,7 @@ type Analyser struct {
 	DependencyGraph string
 	VulnCheck       string
 	errors          []string
+	warnings        []string
 	profiles        []Profile
 	dependencies    []Dependency
 }
@@ -32,6 +33,7 @@ func NewAnalyser() *Analyser {
 		Threshold: 75.0,
 		profiles:  make([]Profile, 0),
 		errors:    make([]string, 0),
+		warnings:  make([]string, 0),
 	}
 }
 
@@ -67,6 +69,15 @@ func (a *Analyser) PushError(err string) *Analyser {
 	return a
 }
 
+func (a *Analyser) PushWarning(warning string) *Analyser {
+	a.warnings = append(a.warnings, warning)
+	return a
+}
+
 func (a *Analyser) GetErrors() []string {
 	return a.errors
+}
+
+func (a *Analyser) GetWarnings() []string {
+	return a.warnings
 }

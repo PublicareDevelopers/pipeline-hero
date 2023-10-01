@@ -43,6 +43,7 @@ var pipeAnalyseCmd = &cobra.Command{
 			os.Exit(255)
 		}
 
+		color.Green("setting dependency graph\n")
 		analyser.SetDependencyGraph(dependencyGraph)
 
 		toolchain, err := analyser.GetToolChainByDependencyGraph(dependencyGraph)
