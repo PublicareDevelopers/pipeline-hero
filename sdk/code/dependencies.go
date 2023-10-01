@@ -1,52 +1,60 @@
 package code
 
 import (
-	"bytes"
 	"fmt"
-	"os/exec"
-	"regexp"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
+	"strings"
 )
 
-func CheckDependencies() ([]string, error) {
-	scanned := make(map[string]bool)
+var maxDependencyChecks = 100
 
-	graph, err := exec.Command("go", "mod", "graph").Output()
-	if err != nil {
-		return nil, err
+func (a *Analyser) GetUpdatableDependencies() []Dependency {
+	updatable := make([]Dependency, 0)
+	for _, dependency := range a.dependencies {
+		if dependency.Updatable {
+			updatable = append(updatable, dependency)
+		}
 	}
 
-	var dependencyUpdates []string
-	//reading graph line for line
-	lines := bytes.Split(graph, []byte("\n"))
-	for _, line := range lines {
-		//if it is an empty line continue
+	return updatable
+}
+
+func (a *Analyser) GetDependencyGraph() []Dependency {
+	return a.dependencies
+}
+
+func (a *Analyser) parseDependencyGraph() {
+	for count, line := range strings.Split(a.DependencyGraph, "\n") {
 		if len(line) == 0 {
 			continue
 		}
-		//split the line by empty space
-		words := bytes.Split(line, []byte(" "))
-		original := string(words[0])
+		line = strings.Trim(line, " ")
 
-		if _, ok := scanned[original]; ok {
-			continue
+		words := strings.Split(line, " ")
+		original := words[0]
+		dependency := words[1]
+
+		updatable := false
+		updateTo := ""
+
+		if count < maxDependencyChecks {
+			update, err := cmds.GetUpdateVersion(dependency)
+			if err == nil {
+				updatable = update != ""
+				updateTo = update
+			}
 		}
 
-		scanned[original] = true
-
-		out, err := exec.Command("go", "list", "-m", "-u", original).Output()
-		if err != nil {
-			fmt.Printf("Error: %s\n", err)
-			continue
-		}
-
-		//check if out have something like []
-		reg := regexp.MustCompile(`\[(.*)\]`)
-		matches := reg.FindStringSubmatch(string(out))
-		if len(matches) > 0 {
-			dependencyUpdates = append(dependencyUpdates, fmt.Sprintf("%s: %s", original, matches[1]))
-		}
-
+		a.dependencies = append(a.dependencies, Dependency{
+			From:      original,
+			To:        dependency,
+			Updatable: updatable,
+			UpdateTo:  updateTo,
+		})
 	}
 
-	return dependencyUpdates, nil
+	if len(a.dependencies) > maxDependencyChecks {
+		a.PushWarning(
+			fmt.Sprintf("Only the first %d dependencies are checked for updates. Have a totoal of %d", maxDependencyChecks, len(a.dependencies)))
+	}
 }

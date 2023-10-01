@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/slack"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/notifier"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
-	"regexp"
-	"strconv"
 )
 
 const BAD = 50.0
@@ -26,31 +25,34 @@ var pipeAnalyseCmd = &cobra.Command{
 	Short: "",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := slack.New()
+		analyser := code.NewAnalyser().SetThreshold(coverageThreshold)
 
-		out, err := exec.Command("go", "version").Output()
+		version, err := cmds.GetVersion()
 		if err != nil {
 			color.Red("Error: %s\n", err)
 			os.Exit(255)
 		}
 
-		color.Green("%s\n", out)
-		client.GoVersion = string(out)
+		analyser.SetGoVersion(version)
 
-		out, err = exec.Command("go", "mod", "graph").Output()
+		color.Green("%s\n", version)
+
+		dependencyGraph, err := cmds.GetDependencyGraph()
 		if err != nil {
 			color.Red("Error: %s\n", err)
 			os.Exit(255)
 		}
 
-		//find complete line where toolchain is mentioned
-		reg := regexp.MustCompile(`(.*)toolchain(.*)`)
-		matches := reg.FindStringSubmatch(string(out))
-		if len(matches) > 0 {
-			client.GoToolchainVersion = matches[1]
-			color.Green("%s\n", matches[1])
+		color.Green("setting dependency graph\n")
+		analyser.SetDependencyGraph(dependencyGraph)
 
+		toolchain, err := analyser.GetToolChainByDependencyGraph(dependencyGraph)
+		if err != nil {
+			color.Red("Error: %s\n", err)
+			os.Exit(255)
 		}
+
+		color.Green("%s\n", toolchain)
 
 		color.Green("setting environment if some arguments are given\n")
 		for key, value := range envVariables {
@@ -64,14 +66,17 @@ var pipeAnalyseCmd = &cobra.Command{
 		}
 
 		color.Green("\nrunning tests\n")
-		out, err = exec.Command("go", "test", testSetup, fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
+		out, err := exec.Command("go", "test", testSetup, fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
 		if err != nil {
 			fmt.Printf("%s\n", string(out))
 			color.Red("Error: %s\n", err)
 			os.Exit(255)
 		}
 
-		fmt.Println(string(out))
+		coverProfile := string(out)
+		analyser.SetCoverProfile(coverProfile)
+
+		fmt.Println(coverProfile)
 		color.Green("running coverage\n")
 
 		//go tool cover -func=cover.cov | tee coverage.txt
@@ -86,69 +91,54 @@ var pipeAnalyseCmd = &cobra.Command{
 		//grep the total amount with a regex
 		totalText := string(out)
 
-		reg = regexp.MustCompile(`total:\s+\((\w+)\)\s+(\d+\.\d+)%`)
-		matches = reg.FindStringSubmatch(totalText)
-		if len(matches) != 3 {
-			color.Red("Error: could not find total coverage\n have %s\n", totalText)
-			os.Exit(255)
-		}
+		analyser.SetCoverageByTotal(totalText)
 
-		//convert to a float
-		total, err := strconv.ParseFloat(matches[2], 64)
+		fmt.Println(analyser.GetCoverageInterpretation())
+
+		err = analyser.CheckThreshold()
 		if err != nil {
-			color.Red("Error: %s\n", err)
+			color.Red("%s\n", err)
 			os.Exit(255)
 		}
 
-		if total < BAD {
-			color.Red("coverage is BAD, have %.2f  percent\n", total)
-		}
+		dependencyUpdates := analyser.GetUpdatableDependencies()
 
-		if total < MEDIUM && total > BAD {
-			color.Yellow("coverage is ok, have %.2f  percent\n", total)
-		}
-
-		if total >= MEDIUM {
-			color.Green("coverage is good, have %.2f  percent\n", total)
-		}
-
-		if total < coverageThreshold {
-			color.Red("coverage threshold %.2f  not reached, have %.2f \n", coverageThreshold, total)
-			os.Exit(255)
-		}
-
-		dep, err := code.CheckDependencies()
-		if err != nil {
-			//not a crtical error
-			client.Errors = append(client.Errors, err.Error())
-		}
-
-		client.DependencyUpdates = dep
-
-		for _, depUpdate := range dep {
-			color.Yellow("dependency update: %s\n", depUpdate)
+		for _, depUpdate := range dependencyUpdates {
+			color.Yellow("(used by %s) dependency update %s to %s\n", depUpdate.From, depUpdate.To, depUpdate.UpdateTo)
 		}
 
 		var vulCheck string
-		vulCheck, err = code.VulCheck()
+		vulCheck, err = cmds.VulnCheck(testSetup)
 		if err != nil {
 			//not a crtical error
-			client.Errors = append(client.Errors, err.Error())
+			fmt.Println(err)
+			analyser.PushError(err.Error())
 		}
 
-		client.VulCheck = vulCheck
+		fmt.Println(vulCheck)
+		analyser.SetVulnCheck(vulCheck)
 
 		if useSlack {
 			color.Green("enabling Slack communication\n")
-			client, err = client.InitConfiguration()
+			handler, err := notifier.New("slack")
 			if err != nil {
 				color.Red("Error: %s\n", err)
 				os.Exit(255)
 			}
 
-			err = client.BuildBlocksByBitbucket(fmt.Sprintf("have %.2f  percent coverage\n", total)).
-				NotifyWithBlocks()
+			err = handler.Client.Validate()
+			if err != nil {
+				color.Red("Error: %s\n", err)
+				os.Exit(255)
+			}
 
+			err = handler.Client.BuildBlocks(analyser)
+			if err != nil {
+				color.Red("Error: %s\n", err)
+				os.Exit(255)
+			}
+
+			err = handler.Client.Notify()
 			if err != nil {
 				color.Red("Error: %s\n", err)
 				os.Exit(255)

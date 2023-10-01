@@ -5,33 +5,22 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // localScanCmd represents the localScan command
 var localScanCmd = &cobra.Command{
-	Use:   "scan",
+	Use:   "scan-vuln",
 	Short: "",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		color.Green("scanning dependencies\n")
-		dep, err := code.CheckDependencies()
+		vulCheck, err := cmds.VulnCheck(testSetup)
 		if err != nil {
 			color.Red("Error: %s\n", err)
-		}
-
-		for _, depUpdate := range dep {
-			color.Yellow("dependency update: %s\n", depUpdate)
-		}
-
-		color.Green("checking for vulnerabilities\n")
-		var vulCheck string
-		vulCheck, err = code.VulCheck()
-		if err != nil {
-			//not a crtical error
-			color.Red("Error: %s\n", err)
+			os.Exit(255)
 		}
 
 		fmt.Println(vulCheck)
