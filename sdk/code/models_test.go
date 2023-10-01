@@ -84,22 +84,22 @@ func TestAnalyser_PushWarning(t *testing.T) {
 	a := NewAnalyser()
 
 	if len(a.warnings) != 0 {
-		t.Errorf("PushError() = %v, want %v", len(a.warnings), 0)
+		t.Errorf("PushWarning() = %v, want %v", len(a.warnings), 0)
 	}
 
 	a.PushWarning("warning 1")
 
 	if len(a.warnings) != 1 {
-		t.Errorf("PushError() = %v, want %v", len(a.warnings), 1)
+		t.Errorf("PushWarning() = %v, want %v", len(a.warnings), 1)
 	}
 
 	warnings := a.GetWarnings()
 
 	if len(warnings) != 1 {
-		t.Errorf("GetErrors() = %v, want %v", len(warnings), 1)
+		t.Errorf("GetWarnings() = %v, want %v", len(warnings), 1)
 	}
 
-	if warnings[0] != "error 1" {
-		t.Errorf("GetErrors() = %v, want %v", warnings[0], "error 1")
+	if warnings[0] != "warning 1" {
+		t.Errorf("GetWarnings() = %v, want %v", warnings[0], "warning 1")
 	}
 }
