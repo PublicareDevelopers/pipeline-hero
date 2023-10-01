@@ -4,16 +4,26 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 // localScanCmd represents the localScan command
 var localScanCmd = &cobra.Command{
-	Use:   "scan",
+	Use:   "scan-vuln",
 	Short: "",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		vulCheck, err := cmds.VulnCheck(testSetup)
+		if err != nil {
+			color.Red("Error: %s\n", err)
+			os.Exit(255)
+		}
 
+		fmt.Println(vulCheck)
 	},
 }
 

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var maxDependencyChecks = 60
+var maxDependencyChecks = 100
 
 func (a *Analyser) GetUpdatableDependencies() []Dependency {
 	updatable := make([]Dependency, 0)
@@ -17,6 +17,10 @@ func (a *Analyser) GetUpdatableDependencies() []Dependency {
 	}
 
 	return updatable
+}
+
+func (a *Analyser) GetDependencyGraph() []Dependency {
+	return a.dependencies
 }
 
 func (a *Analyser) parseDependencyGraph() {
