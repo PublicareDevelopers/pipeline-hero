@@ -11,3 +11,30 @@
 # pipeline-hero
 
 Warning: This is a work in progress. The API is not stable and may change at any time. Use at your own risk.
+
+## install
+```shell
+go install github.com/PublicareDevelopers/pipeline-hero@latest
+```
+
+## get help
+```shell
+pipeline-hero --help
+```
+
+## use in a pipeline
+```shell
+pipeline-hero pipe analyse
+```
+
+```
+Usage:
+  pipeline-hero pipe analyse [flags]
+
+Flags:
+  -c, --coverage-threshold float   Coverage threshold to use (default 75)
+  -e, --env stringToString         Environment variables to set (default [])
+  -h, --help                       help for analyse
+  -s, --slack                      Send results to slack
+  -t, --test-setup string          Test setup to use (default "./...")
+```
