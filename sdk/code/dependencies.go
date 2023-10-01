@@ -1,6 +1,7 @@
 package code
 
 import (
+	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"strings"
 )
@@ -46,5 +47,10 @@ func (a *Analyser) parseDependencyGraph() {
 			Updatable: updatable,
 			UpdateTo:  updateTo,
 		})
+	}
+
+	if len(a.dependencies) > maxDependencyChecks {
+		a.PushWarning(
+			fmt.Sprintf("Only the first %d dependencies are checked for updates. Hae a totoal of %d", maxDependencyChecks, len(a.dependencies)))
 	}
 }
