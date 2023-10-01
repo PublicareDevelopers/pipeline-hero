@@ -29,16 +29,16 @@ func (a *Analyser) SetCoverageByTotal(totalText string) *Analyser {
 
 func (a *Analyser) GetCoverageInterpretation() string {
 	if a.Coverage < BAD {
-		return fmt.Sprintf("coverage is BAD, have %.2f  percent\n", a.Coverage)
+		return fmt.Sprintf("coverage is BAD, have %.2f  percent", a.Coverage)
 	}
 
 	if a.Coverage < MEDIUM && a.Coverage >= BAD {
-		return fmt.Sprintf("coverage is ok, have %.2f  percent\n", a.Coverage)
+		return fmt.Sprintf("coverage is ok, have %.2f  percent", a.Coverage)
 	}
 
 	if a.Coverage >= MEDIUM {
-		return fmt.Sprintf("coverage is good, have %.2f  percent\n", a.Coverage)
+		return fmt.Sprintf("coverage is good, have %.2f  percent", a.Coverage)
 	}
 
-	return fmt.Sprintf("coverage is unknown\n")
+	return fmt.Sprintf("coverage is unknown")
 }

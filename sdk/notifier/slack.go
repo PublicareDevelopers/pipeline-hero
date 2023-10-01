@@ -37,8 +37,8 @@ func (slack *Slack) BuildBlocks(analyser *code.Analyser) error {
 	messageBlock := map[string]any{
 		"type": "section",
 		"text": map[string]any{
-			"type": "plain_text",
-			"text": fmt.Sprintf("%s\nCommit: %s", analyser.GetCoverageInterpretation(), commit),
+			"type": "mrkdwn",
+			"text": fmt.Sprintf("*%s*\nCommit: %s", analyser.GetCoverageInterpretation(), commit),
 		},
 	}
 
@@ -49,8 +49,8 @@ func (slack *Slack) BuildBlocks(analyser *code.Analyser) error {
 	repoBlock := map[string]any{
 		"type": "section",
 		"text": map[string]any{
-			"type": "plain_text",
-			"text": fmt.Sprintf("Repo: %s", repoFullName),
+			"type": "mrkdwn",
+			"text": fmt.Sprintf("Repo: *%s*", repoFullName),
 		},
 	}
 
@@ -83,7 +83,7 @@ func (slack *Slack) BuildBlocks(analyser *code.Analyser) error {
 		dependencyUpdatesMsg = "dependency updates needed: \n"
 		for _, updatableDependency := range updatableDependencies {
 			dependencyUpdatesMsg +=
-				fmt.Sprintf("(used by %s) dependency update %s to %s\n",
+				fmt.Sprintf("* (used by %s) dependency update %s to %s\n",
 					updatableDependency.From,
 					updatableDependency.To,
 					updatableDependency.UpdateTo)
@@ -91,10 +91,10 @@ func (slack *Slack) BuildBlocks(analyser *code.Analyser) error {
 	}
 
 	if len(updatableDependencies) > maxLengthDepUpdates {
-
+		dependencyUpdatesMsg = "dependency updates needed: \n"
 		for i, updatableDependency := range updatableDependencies {
 			dependencyUpdatesMsg +=
-				fmt.Sprintf("(used by %s) dependency update %s to %s\n",
+				fmt.Sprintf("* (used by %s) dependency update %s to %s\n",
 					updatableDependency.From,
 					updatableDependency.To,
 					updatableDependency.UpdateTo)
@@ -109,7 +109,7 @@ func (slack *Slack) BuildBlocks(analyser *code.Analyser) error {
 	dependencyUpdatesBlock := map[string]any{
 		"type": "section",
 		"text": map[string]any{
-			"type": "plain_text",
+			"type": "mrkdwn",
 			"text": dependencyUpdatesMsg,
 		},
 	}
@@ -126,12 +126,30 @@ func (slack *Slack) BuildBlocks(analyser *code.Analyser) error {
 		slack.Blocks = append(slack.Blocks, vulCheckBlock)
 	}
 
+	warnings := analyser.GetWarnings()
+
+	if len(warnings) > 0 {
+		msg := "Warnings:\n"
+		for _, warning := range warnings {
+			msg += fmt.Sprintf(">%s\n", warning)
+		}
+
+		warningsBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": msg,
+			},
+		}
+		slack.Blocks = append(slack.Blocks, warningsBlock)
+	}
+
 	errors := analyser.GetErrors()
 
 	if len(errors) > 0 {
 		msg := "Errors:\n"
 		for _, err := range errors {
-			msg += fmt.Sprintf("%s\n", err)
+			msg += fmt.Sprintf(">%s\n", err)
 		}
 
 		errorsBlock := map[string]any{

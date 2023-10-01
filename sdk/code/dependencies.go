@@ -51,6 +51,6 @@ func (a *Analyser) parseDependencyGraph() {
 
 	if len(a.dependencies) > maxDependencyChecks {
 		a.PushWarning(
-			fmt.Sprintf("Only the first %d dependencies are checked for updates. Hae a totoal of %d", maxDependencyChecks, len(a.dependencies)))
+			fmt.Sprintf("Only the first %d dependencies are checked for updates. Have a totoal of %d", maxDependencyChecks, len(a.dependencies)))
 	}
 }
