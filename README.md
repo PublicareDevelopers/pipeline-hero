@@ -1,5 +1,5 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/PublicareDevelopers/pipeline-hero/graphs/commit-activity)
-![Maintainer](https://img.shields.io/badge/maintainer-DionTech-blue)
+![Maintainer](https://img.shields.io/badge/maintainer-PublicareMarketingCommunicationsGmbH-blue)
 [![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](https://go.dev/)
 [![GitHub license](https://img.shields.io/github/license/PublicareDevelopers/pipeline-hero.svg)](https://github.com/PublicareDevelopers/pipeline-hero/blob/main/LICENSE)
 [![GitHub branches](https://badgen.net/github/branches/PublicareDevelopers/pipeline-hero)](https://github.com/PublicareDevelopers/pipeline-hero/)
