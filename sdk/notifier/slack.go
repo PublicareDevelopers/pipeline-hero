@@ -11,7 +11,7 @@ import (
 	"os"
 )
 
-var maxLengthDepUpdates = 40
+var maxLengthDepUpdates = 30
 
 type Slack struct {
 	WebhookURL string
