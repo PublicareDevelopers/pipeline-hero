@@ -107,10 +107,12 @@ var pipeAnalyseCmd = &cobra.Command{
 			color.Yellow("(used by %s) dependency update %s to %s\n", depUpdate.From, depUpdate.To, depUpdate.UpdateTo)
 		}
 
+		color.Green("starting vuln check\n")
+
 		var vulCheck string
 		vulCheck, err = cmds.VulnCheck(testSetup)
 		if err != nil {
-			//not a crtical error
+			//not a critical error
 			fmt.Println(err)
 			analyser.PushError(err.Error())
 		}

@@ -1,16 +1,20 @@
 package cmds
 
-import "os/exec"
+import (
+	"errors"
+	"fmt"
+	"os/exec"
+)
 
 func VulnCheck(codePart string) (string, error) {
 	_, err := exec.Command("go", "install", "golang.org/x/vuln/cmd/govulncheck@latest").Output()
 	if err != nil {
-		return "", err
+		return fmt.Sprintf("govulncheck not installed: %s", err), nil
 	}
 
 	out, err := exec.Command("govulncheck", codePart).Output()
 	if err != nil {
-		return "", err
+		return "", errors.New(fmt.Sprintf("govulncheck failed:\n%s", string(out)))
 	}
 
 	return string(out), nil
