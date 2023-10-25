@@ -112,9 +112,8 @@ var pipeAnalyseCmd = &cobra.Command{
 		var vulCheck string
 		vulCheck, err = cmds.VulnCheck(testSetup)
 		if err != nil {
-			//not a critical error
-			fmt.Println(err)
-			analyser.PushError(err.Error())
+			color.Red("%s\n", err)
+			os.Exit(255)
 		}
 
 		fmt.Println(vulCheck)
