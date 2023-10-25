@@ -115,15 +115,29 @@ func (slack *Slack) BuildBlocks(analyser *code.Analyser) error {
 	}
 	slack.Blocks = append(slack.Blocks, dependencyUpdatesBlock)
 
+	//split analyser.VulnCheck in text blocks not longer than 3000 characters
+	//slack has a limit of 3000 characters per text block
 	if analyser.VulnCheck != "" {
-		vulCheckBlock := map[string]any{
+		vulnCheckMsg := analyser.VulnCheck
+		for len(vulnCheckMsg) > 3000 {
+			vulnCheckBlock := map[string]any{
+				"type": "section",
+				"text": map[string]any{
+					"type": "mrkdwn",
+					"text": vulnCheckMsg[:3000],
+				},
+			}
+			slack.Blocks = append(slack.Blocks, vulnCheckBlock)
+			vulnCheckMsg = vulnCheckMsg[3000:]
+		}
+		vulnCheckBlock := map[string]any{
 			"type": "section",
 			"text": map[string]any{
-				"type": "plain_text",
-				"text": analyser.VulnCheck,
+				"type": "mrkdwn",
+				"text": vulnCheckMsg,
 			},
 		}
-		slack.Blocks = append(slack.Blocks, vulCheckBlock)
+		slack.Blocks = append(slack.Blocks, vulnCheckBlock)
 	}
 
 	warnings := analyser.GetWarnings()
