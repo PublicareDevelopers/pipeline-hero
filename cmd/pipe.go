@@ -4,6 +4,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var useSlack bool
+var coverageThreshold float64
+
 // pipeCmd represents the pipe command
 var pipeCmd = &cobra.Command{
 	Use:   "pipe",
@@ -16,14 +19,6 @@ var pipeCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(pipeCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// pipeCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// pipeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	pipeCmd.Flags().BoolVarP(&useSlack, "slack", "s", false, "Send results to slack")
+	pipeCmd.Flags().Float64VarP(&coverageThreshold, "coverage-threshold", "c", 75.0, "Coverage threshold to use")
 }
