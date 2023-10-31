@@ -20,7 +20,18 @@ var pipeJSAnalyseCmd = &cobra.Command{
 	Short: "check some frontend components; make sure you are in the same directory where package.json is located",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		analyser := code.NewAnalyser().SetThreshold(coverageThreshold)
+		color.Green("setting environment if some arguments are given\n")
+		for key, value := range envVariables {
+			err := os.Setenv(key, value)
+			if err != nil {
+				color.Red("Error: %s\n", err)
+				os.Exit(255)
+			}
+
+			fmt.Println("set env variable", key, "to", value)
+		}
+
+		analyser := code.NewAnalyser()
 
 		color.Green("analysing package.json\n")
 
@@ -48,7 +59,7 @@ var pipeJSAnalyseCmd = &cobra.Command{
 				os.Exit(255)
 			}
 
-			err = handler.Client.BuildBlocks(analyser)
+			err = handler.Client.BuildJSBlocks(analyser)
 			if err != nil {
 				color.Red("Error: %s\n", err)
 				os.Exit(255)
@@ -65,4 +76,6 @@ var pipeJSAnalyseCmd = &cobra.Command{
 
 func init() {
 	pipeCmd.AddCommand(pipeJSAnalyseCmd)
+	pipeJSAnalyseCmd.Flags().BoolVarP(&useSlack, "slack", "s", false, "Send results to slack")
+	pipeJSAnalyseCmd.Flags().StringToStringVarP(&envVariables, "env", "e", map[string]string{}, "Environment variables to set")
 }
