@@ -19,6 +19,4 @@ var pipeCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(pipeCmd)
-	pipeCmd.Flags().BoolVarP(&useSlack, "slack", "s", false, "Send results to slack")
-	pipeCmd.Flags().Float64VarP(&coverageThreshold, "coverage-threshold", "c", 75.0, "Coverage threshold to use")
 }
