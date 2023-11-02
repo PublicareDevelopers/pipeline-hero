@@ -47,7 +47,7 @@ var pipeJSAnalyseCmd = &cobra.Command{
 
 		fmt.Printf("%s\n", audit)
 
-		slackNotifySuccess(analyser)
+		slackNotifySuccess(analyser, "js")
 	},
 }
 

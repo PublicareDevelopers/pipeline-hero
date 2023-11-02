@@ -302,14 +302,6 @@ func (slack *Slack) BuildErrorBlocks(analyser *code.Analyser, message string) er
 	commit := os.Getenv("BITBUCKET_COMMIT")
 	origin := os.Getenv("BITBUCKET_GIT_HTTP_ORIGIN")
 
-	messageBlock := map[string]any{
-		"type": "section",
-		"text": map[string]any{
-			"type": "mrkdwn",
-			"text": fmt.Sprintf("*%s*\nCommit: %s", analyser.GetCoverageInterpretation(), commit),
-		},
-	}
-
 	deviderBlock := map[string]any{
 		"type": "divider",
 	}
@@ -318,7 +310,7 @@ func (slack *Slack) BuildErrorBlocks(analyser *code.Analyser, message string) er
 		"type": "section",
 		"text": map[string]any{
 			"type": "mrkdwn",
-			"text": message,
+			"text": fmt.Sprintf("*%s*", message),
 		},
 	}
 
@@ -330,8 +322,6 @@ func (slack *Slack) BuildErrorBlocks(analyser *code.Analyser, message string) er
 		},
 	}
 
-	slack.Blocks = append(slack.Blocks, messageBlock)
-	slack.Blocks = append(slack.Blocks, deviderBlock)
 	slack.Blocks = append(slack.Blocks, customMessageBlock)
 	slack.Blocks = append(slack.Blocks, deviderBlock)
 	slack.Blocks = append(slack.Blocks, repoBlock)
@@ -360,6 +350,20 @@ func (slack *Slack) BuildErrorBlocks(analyser *code.Analyser, message string) er
 		msg := "Errors:\n"
 		for _, err := range getErrors {
 			msg += fmt.Sprintf(">%s\n", err)
+		}
+
+		//split msg in text blocks not longer than 3000 characters
+		//slack has a limit of 3000 characters per text block
+		for len(msg) > 3000 {
+			errorsBlock := map[string]any{
+				"type": "section",
+				"text": map[string]any{
+					"type": "plain_text",
+					"text": msg[:3000],
+				},
+			}
+			slack.Blocks = append(slack.Blocks, errorsBlock)
+			msg = msg[3000:]
 		}
 
 		errorsBlock := map[string]any{

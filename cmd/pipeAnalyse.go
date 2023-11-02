@@ -120,7 +120,7 @@ var pipeAnalyseCmd = &cobra.Command{
 		fmt.Println(vulCheck)
 		analyser.SetVulnCheck(vulCheck)
 
-		slackNotifySuccess(analyser)
+		slackNotifySuccess(analyser, "go")
 	},
 }
 

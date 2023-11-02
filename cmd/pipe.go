@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/notifier"
 	"github.com/fatih/color"
@@ -56,7 +57,7 @@ func slackNotifyError(analyser *code.Analyser, message string) {
 	}
 }
 
-func slackNotifySuccess(analyser *code.Analyser) {
+func slackNotifySuccess(analyser *code.Analyser, pipeType string) {
 	if !useSlack {
 		return
 	}
@@ -74,7 +75,15 @@ func slackNotifySuccess(analyser *code.Analyser) {
 		os.Exit(255)
 	}
 
-	err = handler.Client.BuildBlocks(analyser)
+	switch pipeType {
+	case "js":
+		err = handler.Client.BuildJSBlocks(analyser)
+	case "go":
+		err = handler.Client.BuildBlocks(analyser)
+	default:
+		err = fmt.Errorf("unknown pipe type %s", pipeType)
+	}
+
 	if err != nil {
 		color.Red("Error: %s\n", err)
 		os.Exit(255)
