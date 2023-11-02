@@ -296,6 +296,99 @@ func (slack *Slack) BuildJSBlocks(analyser *code.Analyser) error {
 	return nil
 }
 
+func (slack *Slack) BuildErrorBlocks(analyser *code.Analyser, message string) error {
+	repoFullName := os.Getenv("BITBUCKET_REPO_FULL_NAME")
+	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
+	commit := os.Getenv("BITBUCKET_COMMIT")
+	origin := os.Getenv("BITBUCKET_GIT_HTTP_ORIGIN")
+
+	messageBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": fmt.Sprintf("*%s*\nCommit: %s", analyser.GetCoverageInterpretation(), commit),
+		},
+	}
+
+	deviderBlock := map[string]any{
+		"type": "divider",
+	}
+
+	customMessageBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": message,
+		},
+	}
+
+	repoBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": fmt.Sprintf("Repo: *%s*", repoFullName),
+		},
+	}
+
+	slack.Blocks = append(slack.Blocks, messageBlock)
+	slack.Blocks = append(slack.Blocks, deviderBlock)
+	slack.Blocks = append(slack.Blocks, customMessageBlock)
+	slack.Blocks = append(slack.Blocks, deviderBlock)
+	slack.Blocks = append(slack.Blocks, repoBlock)
+
+	warnings := analyser.GetWarnings()
+
+	if len(warnings) > 0 {
+		msg := "Warnings:\n"
+		for _, warning := range warnings {
+			msg += fmt.Sprintf(">%s\n", warning)
+		}
+
+		warningsBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": msg,
+			},
+		}
+		slack.Blocks = append(slack.Blocks, warningsBlock)
+	}
+
+	getErrors := analyser.GetErrors()
+
+	if len(getErrors) > 0 {
+		msg := "Errors:\n"
+		for _, err := range getErrors {
+			msg += fmt.Sprintf(">%s\n", err)
+		}
+
+		errorsBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "plain_text",
+				"text": msg,
+			},
+		}
+		slack.Blocks = append(slack.Blocks, errorsBlock)
+	}
+
+	if origin == "" {
+		return nil
+	}
+
+	pipeLink := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit)),
+		},
+	}
+
+	slack.Blocks = append(slack.Blocks, pipeLink)
+
+	return nil
+}
+
 func (slack *Slack) GetBlocks() []map[string]any {
 	return slack.Blocks
 }
