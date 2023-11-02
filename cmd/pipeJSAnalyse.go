@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/notifier"
 	"github.com/fatih/color"
 	"os"
 
@@ -39,38 +38,16 @@ var pipeJSAnalyseCmd = &cobra.Command{
 		if err != nil {
 			color.Red("%s\n\n", audit)
 			color.Red("%s\n", err)
+			analyser.PushError(audit)
+			slackNotifyError(analyser, "npm audit failed")
+
 			os.Exit(255)
 			return
 		}
 
 		fmt.Printf("%s\n", audit)
 
-		if useSlack {
-			color.Green("enabling Slack communication\n")
-			handler, err := notifier.New("slack")
-			if err != nil {
-				color.Red("Error: %s\n", err)
-				os.Exit(255)
-			}
-
-			err = handler.Client.Validate()
-			if err != nil {
-				color.Red("Error: %s\n", err)
-				os.Exit(255)
-			}
-
-			err = handler.Client.BuildJSBlocks(analyser)
-			if err != nil {
-				color.Red("Error: %s\n", err)
-				os.Exit(255)
-			}
-
-			err = handler.Client.Notify()
-			if err != nil {
-				color.Red("Error: %s\n", err)
-				os.Exit(255)
-			}
-		}
+		slackNotifySuccess(analyser)
 	},
 }
 

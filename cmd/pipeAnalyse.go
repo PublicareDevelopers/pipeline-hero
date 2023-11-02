@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/notifier"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
@@ -96,6 +95,8 @@ var pipeAnalyseCmd = &cobra.Command{
 		err = analyser.CheckThreshold()
 		if err != nil {
 			color.Red("%s\n", err)
+			slackNotifyError(analyser, fmt.Sprintf("coverage threshold not met: have  %.2f  percent", analyser.Coverage))
+			slackNotifyError(analyser, "coverage check failed")
 			os.Exit(255)
 		}
 
@@ -111,38 +112,15 @@ var pipeAnalyseCmd = &cobra.Command{
 		vulCheck, err = cmds.VulnCheck(testSetup)
 		if err != nil {
 			color.Red("%s\n", err)
+			analyser.PushError(vulCheck)
+			slackNotifyError(analyser, "vuln check failed")
 			os.Exit(255)
 		}
 
 		fmt.Println(vulCheck)
 		analyser.SetVulnCheck(vulCheck)
 
-		if useSlack {
-			color.Green("enabling Slack communication\n")
-			handler, err := notifier.New("slack")
-			if err != nil {
-				color.Red("Error: %s\n", err)
-				os.Exit(255)
-			}
-
-			err = handler.Client.Validate()
-			if err != nil {
-				color.Red("Error: %s\n", err)
-				os.Exit(255)
-			}
-
-			err = handler.Client.BuildBlocks(analyser)
-			if err != nil {
-				color.Red("Error: %s\n", err)
-				os.Exit(255)
-			}
-
-			err = handler.Client.Notify()
-			if err != nil {
-				color.Red("Error: %s\n", err)
-				os.Exit(255)
-			}
-		}
+		slackNotifySuccess(analyser)
 	},
 }
 
