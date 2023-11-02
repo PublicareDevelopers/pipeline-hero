@@ -180,20 +180,14 @@ func (slack *Slack) BuildBlocks(analyser *code.Analyser) error {
 		return nil
 	}
 
-	actionBlock := map[string]any{
-		"type": "actions",
-		"elements": []map[string]any{
-			{
-				"type": "button",
-				"text": map[string]any{
-					"type": "plain_text",
-					"text": fmt.Sprintf("Pipe %s", buildNumber),
-				},
-				"url": fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit),
-			},
+	pipeLink := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit)),
 		},
 	}
-	slack.Blocks = append(slack.Blocks, actionBlock)
+	slack.Blocks = append(slack.Blocks, pipeLink)
 
 	return nil
 }
@@ -264,6 +258,20 @@ func (slack *Slack) BuildJSBlocks(analyser *code.Analyser) error {
 			msg += fmt.Sprintf(">%s\n", err)
 		}
 
+		//split msg in text blocks not longer than 3000 characters
+		//slack has a limit of 3000 characters per text block
+		for len(msg) > 3000 {
+			errorsBlock := map[string]any{
+				"type": "section",
+				"text": map[string]any{
+					"type": "plain_text",
+					"text": msg[:3000],
+				},
+			}
+			slack.Blocks = append(slack.Blocks, errorsBlock)
+			msg = msg[3000:]
+		}
+
 		errorsBlock := map[string]any{
 			"type": "section",
 			"text": map[string]any{
@@ -278,20 +286,14 @@ func (slack *Slack) BuildJSBlocks(analyser *code.Analyser) error {
 		return nil
 	}
 
-	actionBlock := map[string]any{
-		"type": "actions",
-		"elements": []map[string]any{
-			{
-				"type": "button",
-				"text": map[string]any{
-					"type": "plain_text",
-					"text": fmt.Sprintf("Pipe %s", buildNumber),
-				},
-				"url": fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit),
-			},
+	pipeLink := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit)),
 		},
 	}
-	slack.Blocks = append(slack.Blocks, actionBlock)
+	slack.Blocks = append(slack.Blocks, pipeLink)
 
 	return nil
 }
