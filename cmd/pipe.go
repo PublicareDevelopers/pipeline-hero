@@ -80,6 +80,8 @@ func slackNotifySuccess(analyser *code.Analyser, pipeType string) {
 		err = handler.Client.BuildJSBlocks(analyser)
 	case "go":
 		err = handler.Client.BuildBlocks(analyser)
+	case "php":
+		err = handler.Client.BuildPHPBlocks(analyser)
 	default:
 		err = fmt.Errorf("unknown pipe type %s", pipeType)
 	}
