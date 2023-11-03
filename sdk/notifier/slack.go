@@ -190,13 +190,13 @@ func (slack *Slack) BuildJSBlocks(analyser *code.Analyser) error {
 	commit := os.Getenv("BITBUCKET_COMMIT")
 	origin := os.Getenv("BITBUCKET_GIT_HTTP_ORIGIN")
 
-	messageBlock := map[string]any{
+	/*messageBlock := map[string]any{
 		"type": "section",
 		"text": map[string]any{
 			"type": "mrkdwn",
 			"text": fmt.Sprintf("*%s*", analyser.GetCoverageInterpretation()),
 		},
-	}
+	}*/
 
 	npmMessageBlock := map[string]any{
 		"type": "section",
@@ -210,8 +210,108 @@ func (slack *Slack) BuildJSBlocks(analyser *code.Analyser) error {
 		"type": "divider",
 	}
 
-	slack.Blocks = append(slack.Blocks, messageBlock)
+	//slack.Blocks = append(slack.Blocks, messageBlock)
+	//slack.Blocks = append(slack.Blocks, deviderBlock)
+	slack.Blocks = append(slack.Blocks, npmMessageBlock)
 	slack.Blocks = append(slack.Blocks, deviderBlock)
+	slack.Blocks = append(slack.Blocks, getRepoBlock())
+	slack.Blocks = append(slack.Blocks, deviderBlock)
+
+	slack.Blocks = append(slack.Blocks, getCommitMessageBlock())
+
+	warnings := analyser.GetWarnings()
+
+	if len(warnings) > 0 {
+		msg := "Warnings:\n"
+		for _, warning := range warnings {
+			msg += fmt.Sprintf(">%s\n", warning)
+		}
+
+		warningsBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": msg,
+			},
+		}
+		slack.Blocks = append(slack.Blocks, warningsBlock)
+	}
+
+	errors := analyser.GetErrors()
+
+	if len(errors) > 0 {
+		msg := "Errors:\n"
+		for _, err := range errors {
+			msg += fmt.Sprintf(">%s\n", err)
+		}
+
+		//split msg in text blocks not longer than 3000 characters
+		//slack has a limit of 3000 characters per text block
+		for len(msg) > 3000 {
+			errorsBlock := map[string]any{
+				"type": "section",
+				"text": map[string]any{
+					"type": "plain_text",
+					"text": msg[:3000],
+				},
+			}
+			slack.Blocks = append(slack.Blocks, errorsBlock)
+			msg = msg[3000:]
+		}
+
+		errorsBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "plain_text",
+				"text": msg,
+			},
+		}
+		slack.Blocks = append(slack.Blocks, errorsBlock)
+	}
+
+	if origin == "" {
+		return nil
+	}
+
+	pipeLink := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit)),
+		},
+	}
+	slack.Blocks = append(slack.Blocks, pipeLink)
+
+	return nil
+}
+
+func (slack *Slack) BuildPHPBlocks(analyser *code.Analyser) error {
+	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
+	commit := os.Getenv("BITBUCKET_COMMIT")
+	origin := os.Getenv("BITBUCKET_GIT_HTTP_ORIGIN")
+
+	/*messageBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": fmt.Sprintf("*%s*", analyser.GetCoverageInterpretation()),
+		},
+	}*/
+
+	npmMessageBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": "analyzed composer.json",
+		},
+	}
+
+	deviderBlock := map[string]any{
+		"type": "divider",
+	}
+
+	//slack.Blocks = append(slack.Blocks, messageBlock)
+	//slack.Blocks = append(slack.Blocks, deviderBlock)
 	slack.Blocks = append(slack.Blocks, npmMessageBlock)
 	slack.Blocks = append(slack.Blocks, deviderBlock)
 	slack.Blocks = append(slack.Blocks, getRepoBlock())
