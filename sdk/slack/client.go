@@ -57,8 +57,8 @@ func NewTestClient() (*Client, error) {
 	channel := os.Getenv("SLACK_MESSAGE_CHANNEL")
 	if oAuthToken != "" || channel != "" {
 		return &Client{
-			OAuthToken: viper.GetString("SLACK_OAUTH_TOKEN"),
-			Channel:    viper.GetString("SLACK_MESSAGE_CHANNEL"),
+			OAuthToken: oAuthToken,
+			Channel:    channel,
 		}, nil
 	}
 
