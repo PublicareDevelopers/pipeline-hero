@@ -2,8 +2,6 @@ package slack
 
 import "testing"
 
-var testChannel = "CH7EEHVDW"
-
 func Test_NewTestClient(t *testing.T) {
 	_, err := NewTestClient()
 	if err != nil {
@@ -29,7 +27,7 @@ func TestList(t *testing.T) {
 		t.Error(err)
 	}
 
-	channels := client.list()
+	channels, err := client.list()
 
 	if err != nil {
 		t.Error(err)

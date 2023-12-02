@@ -23,6 +23,8 @@ type Client struct {
 	OAuthToken string `json:"oauth_token"`
 	Channel    string `json:"channel"`
 	ThreadTs   string `json:"thread_ts"`
+	Errors     []string
+	Blocks     []map[string]any
 }
 
 type WebhookMessage struct {
@@ -47,6 +49,7 @@ type MessageResponse struct {
 	Message          map[string]interface{} `json:"message"`
 	Warning          string                 `json:"warning"`
 	ResponseMetadata map[string]interface{} `json:"response_metadata"`
+	Error            string                 `json:"error"`
 }
 
 func NewTestClient() (*Client, error) {
@@ -56,13 +59,9 @@ func NewTestClient() (*Client, error) {
 		return nil, err
 	}
 
-	//split after sdk/
-	ad := strings.SplitAfter(wd, "sdk/")[1]
-	if ad != "slack" {
-		wd = strings.Replace(wd, fmt.Sprintf("sdk/%s", ad), "sdk/slack", 1)
-	}
-
-	path := fmt.Sprintf("%s/.env", wd)
+	//split after pipeline-hero/
+	envDir := strings.SplitAfter(wd, "pipeline-hero/")[0]
+	path := fmt.Sprintf("%s/.env", envDir)
 
 	viper.SetConfigFile(path)
 
