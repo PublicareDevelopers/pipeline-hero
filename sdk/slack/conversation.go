@@ -30,7 +30,7 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 			"type": "section",
 			"text": map[string]any{
 				"type": "mrkdwn",
-				"text": fmt.Sprintf(":tadta: *%s* \nno urgent action required", "pipeline-hero success"),
+				"text": fmt.Sprintf(":tada: *%s* \nno urgent action required", "pipeline-hero success"),
 			},
 		}
 
