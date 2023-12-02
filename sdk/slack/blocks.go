@@ -5,9 +5,123 @@ import (
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
 	"os"
+	"strings"
 )
 
 var maxLengthDepUpdates = 20
+
+func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
+	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
+	commit := os.Getenv("BITBUCKET_COMMIT")
+	origin := os.Getenv("BITBUCKET_GIT_HTTP_ORIGIN")
+
+	goToolchainVersionBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "plain_text",
+			"text": fmt.Sprintf("Go toolchain version: %s", analyser.Toolchain),
+		},
+	}
+
+	client.Blocks = append(client.Blocks, goToolchainVersionBlock)
+
+	updatableDependencies := analyser.GetUpdatableDependencies()
+
+	dependencyUpdatesMsg := "no dependency updates needed"
+	if len(updatableDependencies) > 0 && len(updatableDependencies) <= maxLengthDepUpdates {
+		dependencyUpdatesMsg = "dependency updates needed: \n"
+		for _, updatableDependency := range updatableDependencies {
+			dependencyUpdatesMsg +=
+				fmt.Sprintf("* (used by %s) dependency update %s to %s\n",
+					updatableDependency.From,
+					updatableDependency.To,
+					updatableDependency.UpdateTo)
+		}
+	}
+
+	if len(updatableDependencies) > maxLengthDepUpdates {
+		dependencyUpdatesMsg = "dependency updates needed: \n"
+		for i, updatableDependency := range updatableDependencies {
+			dependencyUpdatesMsg +=
+				fmt.Sprintf("* (used by %s) dependency update %s to %s\n",
+					updatableDependency.From,
+					updatableDependency.To,
+					updatableDependency.UpdateTo)
+			if i == maxLengthDepUpdates {
+				break
+			}
+		}
+
+		dependencyUpdatesMsg = fmt.Sprintf("total of %d updates; have a look at the pipe", len(updatableDependencies))
+	}
+
+	dependencyUpdatesBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": dependencyUpdatesMsg,
+		},
+	}
+	client.Blocks = append(client.Blocks, dependencyUpdatesBlock)
+
+	//split analyser.VulnCheck in text blocks not longer than 3000 characters
+	//slack has a limit of 3000 characters per text block
+	if analyser.VulnCheck != "" {
+		vulnCheckMsg := analyser.VulnCheck
+		for len(vulnCheckMsg) > 3000 {
+			vulnCheckBlock := map[string]any{
+				"type": "section",
+				"text": map[string]any{
+					"type": "mrkdwn",
+					"text": vulnCheckMsg[:3000],
+				},
+			}
+			client.Blocks = append(client.Blocks, vulnCheckBlock)
+			vulnCheckMsg = vulnCheckMsg[3000:]
+		}
+		vulnCheckBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": vulnCheckMsg,
+			},
+		}
+		client.Blocks = append(client.Blocks, vulnCheckBlock)
+	}
+
+	warnings := analyser.GetWarnings()
+
+	if len(warnings) > 0 {
+		msg := "Warnings:\n"
+		for _, warning := range warnings {
+			msg += fmt.Sprintf(">%s\n", warning)
+		}
+
+		warningsBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": msg,
+			},
+		}
+		client.Blocks = append(client.Blocks, warningsBlock)
+	}
+
+	if origin == "" {
+		return nil
+	}
+
+	pipeLink := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit)),
+		},
+	}
+	client.Blocks = append(client.Blocks, pipeLink)
+
+	return nil
+}
 
 func (client *Client) BuildBlocks(analyser *code.Analyser) error {
 	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
@@ -377,7 +491,7 @@ func (client *Client) BuildErrorBlocks(analyser *code.Analyser, message string) 
 		"type": "section",
 		"text": map[string]any{
 			"type": "mrkdwn",
-			"text": fmt.Sprintf("*%s*", message),
+			"text": fmt.Sprintf("*%s*", strings.Trim(message, "\n")),
 		},
 	}
 
@@ -467,7 +581,7 @@ func getRepoBlock() map[string]any {
 		"type": "section",
 		"text": map[string]any{
 			"type": "mrkdwn",
-			"text": fmt.Sprintf("Repo: *%s*\nBranch: %s", repoFullName, branchName),
+			"text": fmt.Sprintf("pipe run for repo: *%s*\nbranch: *%s*", strings.Trim(repoFullName, ""), strings.Trim(branchName, "")),
 		},
 	}
 }
@@ -480,7 +594,7 @@ func getCommitMessageBlock() map[string]any {
 			"type": "section",
 			"text": map[string]any{
 				"type": "mrkdwn",
-				"text": fmt.Sprintf("Commit %s \nError getting commit message: %s", commitID, err.Error()),
+				"text": fmt.Sprintf("last commit %s \nerror getting commit message: %s", commitID, err.Error()),
 			},
 		}
 	}
@@ -489,7 +603,47 @@ func getCommitMessageBlock() map[string]any {
 		"type": "section",
 		"text": map[string]any{
 			"type": "mrkdwn",
-			"text": fmt.Sprintf("Commit %s:\n*%s*", commitID, commitMessage),
+			"text": fmt.Sprintf("last commit %s:\n*%s*", commitID, commitMessage),
 		},
 	}
+}
+
+func getDividerBlock() map[string]any {
+	return map[string]any{
+		"type": "divider",
+	}
+}
+
+func getErrorsBlock(getErrors []string) ([]map[string]any, error) {
+	returnBlocks := make([]map[string]any, 0)
+
+	msg := "errors:\n"
+	for _, err := range getErrors {
+		msg += fmt.Sprintf(">%s\n", err)
+	}
+
+	//split msg in text blocks not longer than 3000 characters
+	//slack has a limit of 3000 characters per text block
+	for len(msg) > 3000 {
+		errorsBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "plain_text",
+				"text": msg[:3000],
+			},
+		}
+		returnBlocks = append(returnBlocks, errorsBlock)
+		msg = msg[3000:]
+	}
+
+	errorsBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "plain_text",
+			"text": msg,
+		},
+	}
+	returnBlocks = append(returnBlocks, errorsBlock)
+
+	return returnBlocks, nil
 }

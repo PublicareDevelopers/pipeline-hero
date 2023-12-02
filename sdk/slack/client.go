@@ -144,10 +144,16 @@ func (client *Client) SendProgressSlackMessage(message string) error {
 }
 
 func (client *Client) sendSlackBlocks(channelId string, blocks []map[string]any) error {
-	blockJson, err := json.Marshal(map[string]any{
+	message := map[string]any{
 		"channel": channelId,
 		"blocks":  blocks,
-	})
+	}
+
+	if client.ThreadTs != "" {
+		message["thread_ts"] = client.ThreadTs
+	}
+
+	blockJson, err := json.Marshal(message)
 	if err != nil {
 		return err
 	}

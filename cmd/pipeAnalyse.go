@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/slack"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
@@ -51,7 +52,30 @@ var pipeAnalyseCmd = &cobra.Command{
 
 		wg.Wait()
 
-		slackNotifySuccess(analyser, "go")
+		if !useSlack {
+			if len(analyser.GetErrors()) > 0 {
+				color.Red("pipeline-hero failed\n")
+				os.Exit(255)
+			}
+			return
+		}
+
+		client, err := slack.NewClient()
+		if err != nil {
+			color.Red("error at slack handling: %s\n", err)
+			os.Exit(255)
+		}
+
+		err = client.StartConversation(analyser, "go")
+		if err != nil {
+			color.Red("Error: %s\n", err)
+			os.Exit(255)
+		}
+
+		if len(analyser.GetErrors()) > 0 {
+			color.Red("pipeline-hero failed\n")
+			os.Exit(255)
+		}
 	},
 }
 
