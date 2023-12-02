@@ -53,6 +53,15 @@ type MessageResponse struct {
 }
 
 func NewTestClient() (*Client, error) {
+	oAuthToken := os.Getenv("SLACK_OAUTH_TOKEN")
+	channel := os.Getenv("SLACK_MESSAGE_CHANNEL")
+	if oAuthToken != "" || channel != "" {
+		return &Client{
+			OAuthToken: viper.GetString("SLACK_OAUTH_TOKEN"),
+			Channel:    viper.GetString("SLACK_MESSAGE_CHANNEL"),
+		}, nil
+	}
+
 	//check the actual directory
 	wd, err := os.Getwd()
 	if err != nil {
