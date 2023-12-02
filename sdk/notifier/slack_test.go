@@ -3,6 +3,7 @@ package notifier
 import (
 	"encoding/json"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/slack"
 	"os"
 	"strings"
 	"testing"
@@ -88,5 +89,37 @@ func TestSlack_BuildErrorBlocks(t *testing.T) {
 
 	if !strings.Contains(string(blockStr), "error occurred") {
 		t.Fatalf("expected error, got %s", string(blockStr))
+	}
+}
+
+func TestSlack_SendErrorBlocks(t *testing.T) {
+	analyser := code.NewAnalyser().SetThreshold(50.0).
+		SetGoVersion("go version go1.20.13 darwin/amd64").
+		SetCoverageByTotal("total: (statements) 100.0%").
+		PushError("error occurred")
+
+	handler, err := New("slack")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = handler.Client.BuildErrorBlocks(analyser, "pipe failed")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	blocks := handler.Client.GetBlocks()
+	if len(blocks) == 0 {
+		t.Fatalf("expected blocks, got 0")
+	}
+
+	slackClient, err := slack.NewTestClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = slackClient.SendProgressSlackBlocks(blocks)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
