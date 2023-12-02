@@ -25,6 +25,17 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 
 		startBlocks = append(startBlocks, errorMessage)
 		startBlocks = append(startBlocks, getDividerBlock())
+	} else {
+		successMessage := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf(":zielflage: *%s* \nno urgent action required", "pipeline-hero success"),
+			},
+		}
+
+		startBlocks = append(startBlocks, successMessage)
+		startBlocks = append(startBlocks, getDividerBlock())
 	}
 
 	startBlocks = append(startBlocks, getCommitMessageBlock())
