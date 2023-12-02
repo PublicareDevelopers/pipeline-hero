@@ -45,12 +45,14 @@ func (a *Analyser) parseDependencyGraph() {
 			}
 		}
 
+		a.lock.Lock()
 		a.dependencies = append(a.dependencies, Dependency{
 			From:      original,
 			To:        dependency,
 			Updatable: updatable,
 			UpdateTo:  updateTo,
 		})
+		a.lock.Unlock()
 	}
 
 	if len(a.dependencies) > maxDependencyChecks {

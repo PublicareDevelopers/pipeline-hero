@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/notifier"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/slack"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
@@ -31,26 +31,19 @@ func slackNotifyError(analyser *code.Analyser, message string) {
 		return
 	}
 
-	color.Green("enabling Slack communication\n")
-	handler, err := notifier.New("slack")
+	client, err := slack.NewClient()
+	if err != nil {
+		color.Red("error at slack handling: %s\n", err)
+		os.Exit(255)
+	}
+
+	err = client.BuildErrorBlocks(analyser, message)
 	if err != nil {
 		color.Red("Error: %s\n", err)
 		os.Exit(255)
 	}
 
-	err = handler.Client.Validate()
-	if err != nil {
-		color.Red("Error: %s\n", err)
-		os.Exit(255)
-	}
-
-	err = handler.Client.BuildErrorBlocks(analyser, message)
-	if err != nil {
-		color.Red("Error: %s\n", err)
-		os.Exit(255)
-	}
-
-	err = handler.Client.Notify()
+	err = client.SendProgressSlackBlocks(client.Blocks)
 	if err != nil {
 		color.Red("Error: %s\n", err)
 		os.Exit(255)
@@ -62,26 +55,19 @@ func slackNotifySuccess(analyser *code.Analyser, pipeType string) {
 		return
 	}
 
-	color.Green("enabling Slack communication\n")
-	handler, err := notifier.New("slack")
+	client, err := slack.NewClient()
 	if err != nil {
-		color.Red("Error: %s\n", err)
-		os.Exit(255)
-	}
-
-	err = handler.Client.Validate()
-	if err != nil {
-		color.Red("Error: %s\n", err)
+		color.Red("error at slack handling: %s\n", err)
 		os.Exit(255)
 	}
 
 	switch pipeType {
 	case "js":
-		err = handler.Client.BuildJSBlocks(analyser)
+		err = client.BuildJSBlocks(analyser)
 	case "go":
-		err = handler.Client.BuildBlocks(analyser)
+		err = client.BuildBlocks(analyser)
 	case "php":
-		err = handler.Client.BuildPHPBlocks(analyser)
+		err = client.BuildPHPBlocks(analyser)
 	default:
 		err = fmt.Errorf("unknown pipe type %s", pipeType)
 	}
@@ -91,7 +77,7 @@ func slackNotifySuccess(analyser *code.Analyser, pipeType string) {
 		os.Exit(255)
 	}
 
-	err = handler.Client.Notify()
+	err = client.SendProgressSlackBlocks(client.Blocks)
 	if err != nil {
 		color.Red("Error: %s\n", err)
 		os.Exit(255)
