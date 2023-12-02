@@ -589,6 +589,9 @@ func getRepoBlock() map[string]any {
 func getCommitMessageBlock() map[string]any {
 	commitID := os.Getenv("BITBUCKET_COMMIT")
 	commitMessage, err := cmds.GetCommitMessages()
+
+	commitMessage = strings.Trim(commitMessage, "\n")
+
 	if err != nil {
 		return map[string]any{
 			"type": "section",
