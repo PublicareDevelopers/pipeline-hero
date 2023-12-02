@@ -69,7 +69,9 @@ func analyseVersion(analyser *code.Analyser, wg *sync.WaitGroup) {
 	version, err := cmds.GetVersion()
 	if err != nil {
 		color.Red("Error: %s\n", err)
-		os.Exit(255)
+		analyser.PushError(fmt.Sprintf("cannot find the go version: %s\n", err))
+		wg.Done()
+		return
 	}
 
 	analyser.SetGoVersion(version)
@@ -82,8 +84,10 @@ func analyseSDependencyGraph(analyser *code.Analyser, wg *sync.WaitGroup) {
 
 	dependencyGraph, err := cmds.GetDependencyGraph()
 	if err != nil {
+		analyser.PushError(fmt.Sprintf("cannot find the dependency graph: %s\n", err))
 		color.Red("Error: %s\n", err)
-		os.Exit(255)
+		wg.Done()
+		return
 	}
 
 	color.Green("setting dependency graph\n")
@@ -92,11 +96,12 @@ func analyseSDependencyGraph(analyser *code.Analyser, wg *sync.WaitGroup) {
 	toolchain, err := analyser.GetToolChainByDependencyGraph(dependencyGraph)
 	if err != nil {
 		color.Red("Error: %s\n", err)
-		os.Exit(255)
+		analyser.PushError(fmt.Sprintf("cannot find the toolchain: %s\n", err))
 	}
 
 	color.Green("%s\n", toolchain)
 
+	//TODO => find only the ones by the own module
 	dependencyUpdates := analyser.GetUpdatableDependencies()
 
 	for _, depUpdate := range dependencyUpdates {
@@ -112,7 +117,9 @@ func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {
 	if err != nil {
 		fmt.Printf("%s\n", string(out))
 		color.Red("Error: %s\n", err)
-		os.Exit(255)
+		analyser.PushError(fmt.Sprintf("Tests failed:\n%s\n", string(out)))
+		wg.Done()
+		return
 	}
 
 	coverProfile := string(out)
@@ -126,7 +133,9 @@ func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {
 	if err != nil {
 		fmt.Printf("%s\n", string(out))
 		color.Red("Error: %s\n", err)
-		os.Exit(255)
+		analyser.PushError(fmt.Sprintf("Coverage failed:\n%s\n", string(out)))
+		wg.Done()
+		return
 	}
 
 	//we have something like total:  (statements)    0.0%
@@ -140,9 +149,9 @@ func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {
 	err = analyser.CheckThreshold()
 	if err != nil {
 		color.Red("%s\n", err)
-		slackNotifyError(analyser, fmt.Sprintf("coverage threshold not met: have  %.2f  percent", analyser.Coverage))
-		slackNotifyError(analyser, "coverage check failed")
-		os.Exit(255)
+		analyser.PushError(fmt.Sprintf("coverage threshold not met: have  %.2f  percent", analyser.Coverage))
+		wg.Done()
+		return
 	}
 }
 
@@ -155,9 +164,9 @@ func analyseVulnCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 	vulCheck, err := cmds.VulnCheck(testSetup)
 	if err != nil {
 		color.Red("%s\n", err)
-		analyser.PushError(vulCheck)
-		slackNotifyError(analyser, "vuln check failed")
-		os.Exit(255)
+		analyser.PushError(err.Error())
+		wg.Done()
+		return
 	}
 
 	fmt.Println(vulCheck)

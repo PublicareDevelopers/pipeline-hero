@@ -18,7 +18,7 @@ type Analyser struct {
 	warnings         []string
 	profiles         []Profile
 	dependencies     []Dependency
-	lock             sync.Locker
+	lock             *sync.Mutex
 }
 
 type Profile struct {
@@ -41,6 +41,7 @@ func NewAnalyser() *Analyser {
 		profiles:  make([]Profile, 0),
 		errors:    make([]string, 0),
 		warnings:  make([]string, 0),
+		lock:      &sync.Mutex{},
 	}
 }
 
@@ -54,16 +55,16 @@ func (a *Analyser) SetThreshold(threshold float64) *Analyser {
 func (a *Analyser) SetCoverProfile(coverProfile string) *Analyser {
 	a.lock.Lock()
 	a.CoverProfile = coverProfile
-	a.parseCoverProfile()
 	a.lock.Unlock()
+	a.parseCoverProfile()
 	return a
 }
 
 func (a *Analyser) SetDependencyGraph(dependencyGraph string) *Analyser {
 	a.lock.Lock()
 	a.DependencyGraph = dependencyGraph
-	a.parseDependencyGraph()
 	a.lock.Unlock()
+	a.parseDependencyGraph()
 	return a
 }
 
