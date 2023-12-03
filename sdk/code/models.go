@@ -1,16 +1,22 @@
 package code
 
-import "sync"
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
+	"sync"
+)
 
 type Analyser struct {
-	GoVersion        string
+	Module           GoMod
+	GoVersion        string //will have the OS also here
 	HasGoVersionFail bool
 	Threshold        float64
 	Coverage         float64
 	HasCoverageFail  bool
-	Toolchain        string
 	CoverProfile     string
 	DependencyGraph  string
+	Updates          []RequireUpdate
 	VulnCheck        string
 	HasVuln          bool
 	HasErrors        bool
@@ -35,9 +41,54 @@ type Dependency struct {
 	UpdateTo  string
 }
 
+type Module struct {
+	Path    string
+	Version string
+}
+
+type GoMod struct {
+	Module    ModPath
+	Go        string
+	Toolchain string
+	Require   []Require
+	Exclude   []Module
+	Replace   []Replace
+	Retract   []Retract
+}
+
+type ModPath struct {
+	Path       string
+	Deprecated string
+}
+
+type Require struct {
+	Path     string
+	Version  string
+	Indirect bool
+}
+
+type RequireUpdate struct {
+	Path             string
+	Version          string
+	AvailableVersion string
+	Indirect         bool
+}
+
+type Replace struct {
+	Old Module
+	New Module
+}
+
+type Retract struct {
+	Low       string
+	High      string
+	Rationale string
+}
+
 func NewAnalyser() *Analyser {
 	return &Analyser{
 		Threshold: 75.0,
+		Updates:   make([]RequireUpdate, 0),
 		profiles:  make([]Profile, 0),
 		errors:    make([]string, 0),
 		warnings:  make([]string, 0),
@@ -72,6 +123,30 @@ func (a *Analyser) SetVulnCheck(vulnCheck string) *Analyser {
 	a.lock.Lock()
 	a.VulnCheck = vulnCheck
 	a.lock.Unlock()
+	return a
+}
+
+func (a *Analyser) SetModule() *Analyser {
+	moduleJson, err := cmds.AnalyseModule()
+	if err != nil {
+		a.lock.Lock()
+		a.PushWarning(fmt.Sprintf("internal pipeline-hero error: cannot find the module: %s\n", err))
+		a.lock.Unlock()
+		return a
+	}
+	module := GoMod{}
+	err = json.Unmarshal([]byte(moduleJson), &module)
+	if err != nil {
+		a.lock.Lock()
+		a.PushWarning(fmt.Sprintf("internal pipeline-hero error: cannot parse the module: %s\n", err))
+		a.lock.Unlock()
+		return a
+	}
+
+	a.lock.Lock()
+	a.Module = module
+	a.lock.Unlock()
+
 	return a
 }
 
