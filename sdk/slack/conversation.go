@@ -38,20 +38,6 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 		startBlocks = append(startBlocks, getDividerBlock())
 	}
 
-	startBlocks = append(startBlocks, getCommitMessageBlock())
-	startBlocks = append(startBlocks, getDividerBlock())
-
-	goVersionBlock := map[string]any{
-		"type": "section",
-		"text": map[string]any{
-			"type": "plain_text",
-			"text": fmt.Sprintf("Go version OS: %s", analyser.GoVersion),
-		},
-	}
-
-	startBlocks = append(startBlocks, goVersionBlock)
-	startBlocks = append(startBlocks, getDividerBlock())
-
 	coverageBlock := map[string]any{
 		"type": "section",
 		"text": map[string]any{
@@ -71,6 +57,20 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 
 		startBlocks = append(startBlocks, errorBlocks...)
 	}
+
+	goVersionBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "plain_text",
+			"text": fmt.Sprintf("Go version OS: %s", analyser.GoVersion),
+		},
+	}
+
+	startBlocks = append(startBlocks, goVersionBlock)
+	startBlocks = append(startBlocks, getDividerBlock())
+
+	startBlocks = append(startBlocks, getCommitMessageBlock())
+	startBlocks = append(startBlocks, getDividerBlock())
 
 	err := client.SendProgressSlackBlocks(startBlocks)
 	if err != nil {
