@@ -106,31 +106,20 @@ func analyseVersion(analyser *code.Analyser, wg *sync.WaitGroup) {
 func analyseSDependencyGraph(analyser *code.Analyser, wg *sync.WaitGroup) {
 	defer wg.Done()
 
+	analyser.SetModule()
+	analyser.SetUpdatableRequirements()
+
 	dependencyGraph, err := cmds.GetDependencyGraph()
 	if err != nil {
-		analyser.PushError(fmt.Sprintf("cannot find the dependency graph: %s\n", err))
+		analyser.PushWarning(fmt.Sprintf("internal pipeline-hero error: cannot find the dependency graph: %s\n", err))
 		color.Red("Error: %s\n", err)
 		wg.Done()
 		return
 	}
 
 	color.Green("setting dependency graph\n")
+
 	analyser.SetDependencyGraph(dependencyGraph)
-
-	toolchain, err := analyser.GetToolChainByDependencyGraph(dependencyGraph)
-	if err != nil {
-		color.Red("Error: %s\n", err)
-		analyser.PushError(fmt.Sprintf("cannot find the toolchain: %s\n", err))
-	}
-
-	color.Green("%s\n", toolchain)
-
-	//TODO => find only the ones by the own module
-	dependencyUpdates := analyser.GetUpdatableDependencies()
-
-	for _, depUpdate := range dependencyUpdates {
-		color.Yellow("(used by %s) dependency update %s to %s\n", depUpdate.From, depUpdate.To, depUpdate.UpdateTo)
-	}
 }
 
 func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {

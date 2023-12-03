@@ -69,6 +69,19 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 	startBlocks = append(startBlocks, goVersionBlock)
 	startBlocks = append(startBlocks, getDividerBlock())
 
+	if len(analyser.Updates) > 0 {
+		updateBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf("*%d updates needed*; check the thread for more details", len(analyser.Updates)),
+			},
+		}
+
+		startBlocks = append(startBlocks, updateBlock)
+		startBlocks = append(startBlocks, getDividerBlock())
+	}
+
 	startBlocks = append(startBlocks, getCommitMessageBlock())
 	startBlocks = append(startBlocks, getDividerBlock())
 

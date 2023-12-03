@@ -15,44 +15,24 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 	commit := os.Getenv("BITBUCKET_COMMIT")
 	origin := os.Getenv("BITBUCKET_GIT_HTTP_ORIGIN")
 
+	toolchain := analyser.Module.Toolchain
+	if toolchain == "" {
+		toolchain = "no toolchain found"
+	}
+
 	goToolchainVersionBlock := map[string]any{
 		"type": "section",
 		"text": map[string]any{
 			"type": "plain_text",
-			"text": fmt.Sprintf("Go toolchain version: %s", analyser.Toolchain),
+			"text": fmt.Sprintf("Go toolchain version: %s", toolchain),
 		},
 	}
 
 	client.Blocks = append(client.Blocks, goToolchainVersionBlock)
-
-	updatableDependencies := analyser.GetUpdatableDependencies()
-
 	dependencyUpdatesMsg := "no dependency updates needed"
-	if len(updatableDependencies) > 0 && len(updatableDependencies) <= maxLengthDepUpdates {
-		dependencyUpdatesMsg = "dependency updates needed: \n"
-		for _, updatableDependency := range updatableDependencies {
-			dependencyUpdatesMsg +=
-				fmt.Sprintf("* (used by %s) dependency update %s to %s\n",
-					updatableDependency.From,
-					updatableDependency.To,
-					updatableDependency.UpdateTo)
-		}
-	}
 
-	if len(updatableDependencies) > maxLengthDepUpdates {
-		dependencyUpdatesMsg = "dependency updates needed: \n"
-		for i, updatableDependency := range updatableDependencies {
-			dependencyUpdatesMsg +=
-				fmt.Sprintf("* (used by %s) dependency update %s to %s\n",
-					updatableDependency.From,
-					updatableDependency.To,
-					updatableDependency.UpdateTo)
-			if i == maxLengthDepUpdates {
-				break
-			}
-		}
-
-		dependencyUpdatesMsg = fmt.Sprintf("total of %d updates; have a look at the pipe", len(updatableDependencies))
+	if len(analyser.Updates) > 0 {
+		dependencyUpdatesMsg = "*dependency updates needed:* \n"
 	}
 
 	dependencyUpdatesBlock := map[string]any{
@@ -64,29 +44,18 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 	}
 	client.Blocks = append(client.Blocks, dependencyUpdatesBlock)
 
-	//split analyser.VulnCheck in text blocks not longer than 3000 characters
-	//slack has a limit of 3000 characters per text block
-	if analyser.VulnCheck != "" {
-		vulnCheckMsg := analyser.VulnCheck
-		for len(vulnCheckMsg) > 3000 {
-			vulnCheckBlock := map[string]any{
-				"type": "section",
-				"text": map[string]any{
-					"type": "mrkdwn",
-					"text": vulnCheckMsg[:3000],
-				},
-			}
-			client.Blocks = append(client.Blocks, vulnCheckBlock)
-			vulnCheckMsg = vulnCheckMsg[3000:]
-		}
-		vulnCheckBlock := map[string]any{
+	for _, updatableDependency := range analyser.Updates {
+		dependencyUpdatesBlock := map[string]any{
 			"type": "section",
 			"text": map[string]any{
 				"type": "mrkdwn",
-				"text": vulnCheckMsg,
+				"text": fmt.Sprintf("%s dependency update %s -> %s\n",
+					updatableDependency.Path,
+					updatableDependency.Version,
+					updatableDependency.AvailableVersion),
 			},
 		}
-		client.Blocks = append(client.Blocks, vulnCheckBlock)
+		client.Blocks = append(client.Blocks, dependencyUpdatesBlock)
 	}
 
 	warnings := analyser.GetWarnings()
@@ -115,7 +84,7 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 		"type": "section",
 		"text": map[string]any{
 			"type": "mrkdwn",
-			"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/addon/pipelines/home#!/results/%s", origin, commit)),
+			"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/pipelines/results/%s", origin, commit)),
 		},
 	}
 	client.Blocks = append(client.Blocks, pipeLink)
@@ -123,6 +92,8 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 	return nil
 }
 
+// BuildBlocks
+// Deprecated: use BuildThreadBlocks instead
 func (client *Client) BuildBlocks(analyser *code.Analyser) error {
 	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
 	commit := os.Getenv("BITBUCKET_COMMIT")
@@ -148,11 +119,16 @@ func (client *Client) BuildBlocks(analyser *code.Analyser) error {
 		},
 	}
 
+	toolchain := analyser.Module.Toolchain
+	if toolchain == "" {
+		toolchain = "no toolchain found"
+	}
+
 	goToolchainVersionBlock := map[string]any{
 		"type": "section",
 		"text": map[string]any{
 			"type": "plain_text",
-			"text": fmt.Sprintf("Go toolchain version: %s", analyser.Toolchain),
+			"text": fmt.Sprintf("Go toolchain version: %s", toolchain),
 		},
 	}
 
