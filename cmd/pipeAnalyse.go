@@ -94,7 +94,6 @@ func analyseVersion(analyser *code.Analyser, wg *sync.WaitGroup) {
 	if err != nil {
 		color.Red("Error: %s\n", err)
 		analyser.PushError(fmt.Sprintf("cannot find the go version: %s\n", err))
-		wg.Done()
 		return
 	}
 
@@ -113,7 +112,6 @@ func analyseSDependencyGraph(analyser *code.Analyser, wg *sync.WaitGroup) {
 	if err != nil {
 		analyser.PushWarning(fmt.Sprintf("internal pipeline-hero error: cannot find the dependency graph: %s\n", err))
 		color.Red("Error: %s\n", err)
-		wg.Done()
 		return
 	}
 
@@ -131,7 +129,6 @@ func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {
 		fmt.Printf("%s\n", string(out))
 		color.Red("Error: %s\n", err)
 		analyser.PushError(fmt.Sprintf("Tests failed:\n%s\n", string(out)))
-		wg.Done()
 		return
 	}
 
@@ -147,7 +144,6 @@ func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {
 		fmt.Printf("%s\n", string(out))
 		color.Red("Error: %s\n", err)
 		analyser.PushError(fmt.Sprintf("Coverage failed:\n%s\n", string(out)))
-		wg.Done()
 		return
 	}
 
@@ -163,7 +159,6 @@ func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {
 	if err != nil {
 		color.Red("%s\n", err)
 		analyser.PushError(fmt.Sprintf("coverage threshold not met: have  %.2f  percent", analyser.Coverage))
-		wg.Done()
 		return
 	}
 }
@@ -178,7 +173,6 @@ func analyseVulnCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 	if err != nil {
 		color.Red("%s\n", err)
 		analyser.PushError(err.Error())
-		wg.Done()
 		return
 	}
 

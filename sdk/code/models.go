@@ -178,3 +178,7 @@ func (a *Analyser) GetErrors() []string {
 func (a *Analyser) GetWarnings() []string {
 	return a.warnings
 }
+
+func (a *Analyser) GetProfiles() []Profile {
+	return a.profiles
+}

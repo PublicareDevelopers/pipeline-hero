@@ -47,6 +47,15 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 	}
 
 	startBlocks = append(startBlocks, coverageBlock)
+	goVersionBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "plain_text",
+			"text": fmt.Sprintf("%s", analyser.GoVersion),
+		},
+	}
+
+	startBlocks = append(startBlocks, goVersionBlock)
 	startBlocks = append(startBlocks, getDividerBlock())
 
 	if len(pipeErrors) > 0 {
@@ -56,25 +65,15 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 		}
 
 		startBlocks = append(startBlocks, errorBlocks...)
+		startBlocks = append(startBlocks, getDividerBlock())
 	}
-
-	goVersionBlock := map[string]any{
-		"type": "section",
-		"text": map[string]any{
-			"type": "plain_text",
-			"text": fmt.Sprintf("Go version OS: %s", analyser.GoVersion),
-		},
-	}
-
-	startBlocks = append(startBlocks, goVersionBlock)
-	startBlocks = append(startBlocks, getDividerBlock())
 
 	if len(analyser.Updates) > 0 {
 		updateBlock := map[string]any{
 			"type": "section",
 			"text": map[string]any{
 				"type": "mrkdwn",
-				"text": fmt.Sprintf("*%d updates needed*; check the thread for more details", len(analyser.Updates)),
+				"text": fmt.Sprintf("*%d update(s) needed*; check the thread for more details", len(analyser.Updates)),
 			},
 		}
 
