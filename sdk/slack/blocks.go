@@ -6,29 +6,31 @@ import (
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
 	"os"
 	"strings"
+	"time"
 )
 
 var maxLengthDepUpdates = 20
 
 func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
-	commit := os.Getenv("BITBUCKET_COMMIT")
 	origin := os.Getenv("BITBUCKET_GIT_HTTP_ORIGIN")
 
+	client.Blocks = append(client.Blocks, getTestDurationBlock(analyser.GetProfiles()))
+	client.Blocks = append(client.Blocks, getDividerBlock())
+
 	toolchain := analyser.Module.Toolchain
-	if toolchain == "" {
-		toolchain = "no toolchain found"
+	if toolchain != "" {
+		goToolchainVersionBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "plain_text",
+				"text": fmt.Sprintf("Go toolchain version: %s", toolchain),
+			},
+		}
+		client.Blocks = append(client.Blocks, goToolchainVersionBlock)
+		client.Blocks = append(client.Blocks, getDividerBlock())
 	}
 
-	goToolchainVersionBlock := map[string]any{
-		"type": "section",
-		"text": map[string]any{
-			"type": "plain_text",
-			"text": fmt.Sprintf("Go toolchain version: %s", toolchain),
-		},
-	}
-
-	client.Blocks = append(client.Blocks, goToolchainVersionBlock)
 	dependencyUpdatesMsg := "no dependency updates needed"
 
 	if len(analyser.Updates) > 0 {
@@ -84,7 +86,7 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 		"type": "section",
 		"text": map[string]any{
 			"type": "mrkdwn",
-			"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/pipelines/results/%s", origin, commit)),
+			"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/pipelines/results/%s", origin, buildNumber)),
 		},
 	}
 	client.Blocks = append(client.Blocks, pipeLink)
@@ -582,7 +584,7 @@ func getCommitMessageBlock() map[string]any {
 		"type": "section",
 		"text": map[string]any{
 			"type": "mrkdwn",
-			"text": fmt.Sprintf("last commit %s:\n*%s*", commitID, commitMessage),
+			"text": fmt.Sprintf("last commit %s:\n%s", commitID, commitMessage),
 		},
 	}
 }
@@ -625,4 +627,20 @@ func getErrorsBlock(getErrors []string) ([]map[string]any, error) {
 	returnBlocks = append(returnBlocks, errorsBlock)
 
 	return returnBlocks, nil
+}
+
+func getTestDurationBlock(profiles []code.Profile) map[string]any {
+	duration := time.Duration(0 * time.Second)
+	for _, profile := range profiles {
+		duration += time.Duration(profile.Duration * float64(time.Second))
+	}
+
+	return map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "plain_text",
+			"text": fmt.Sprintf("test duration: %s", duration),
+		},
+	}
+
 }
