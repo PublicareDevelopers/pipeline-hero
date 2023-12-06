@@ -34,4 +34,6 @@ jobs:
         env: # Or as an environment variable
           SLACK_OAUTH_TOKEN: ${{ secrets.SLACK_OAUTH_TOKEN }}
           SLACK_MESSAGE_CHANNEL: ${{ secrets.SLACK_MESSAGE_CHANNEL }}
+          PH_TOKEN: ${{ secrets.PH_TOKEN }}
+          PH_ORIGIN: ${{ secrets.PH_ORIGIN }}
         run: go test ./... -v
