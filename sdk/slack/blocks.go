@@ -82,6 +82,11 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 		return nil
 	}
 
+	//make sure we have https, not only http
+	if strings.HasPrefix(origin, "http://") {
+		origin = strings.Replace(origin, "http://", "https://", 1)
+	}
+
 	pipeLink := map[string]any{
 		"type": "section",
 		"text": map[string]any{
