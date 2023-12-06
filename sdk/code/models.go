@@ -8,10 +8,10 @@ type Analyser struct {
 	CoverProfile    string
 	DependencyGraph string
 	VulnCheck       string
-	errors          []string
-	warnings        []string
-	profiles        []Profile
-	dependencies    []Dependency
+	Errors          []string
+	Warnings        []string
+	Profiles        []Profile
+	dependencies    []Dependency //Deprecated: we will not use the deep dependency check here anymore; not needed; can be done at platform if needed
 }
 
 type Profile struct {
@@ -31,9 +31,9 @@ type Dependency struct {
 func NewAnalyser() *Analyser {
 	return &Analyser{
 		Threshold: 75.0,
-		profiles:  make([]Profile, 0),
-		errors:    make([]string, 0),
-		warnings:  make([]string, 0),
+		Profiles:  make([]Profile, 0),
+		Errors:    make([]string, 0),
+		Warnings:  make([]string, 0),
 	}
 }
 
@@ -65,19 +65,19 @@ func (a *Analyser) SetGoVersion(goVersion string) *Analyser {
 }
 
 func (a *Analyser) PushError(err string) *Analyser {
-	a.errors = append(a.errors, err)
+	a.Errors = append(a.Errors, err)
 	return a
 }
 
 func (a *Analyser) PushWarning(warning string) *Analyser {
-	a.warnings = append(a.warnings, warning)
+	a.Warnings = append(a.Warnings, warning)
 	return a
 }
 
 func (a *Analyser) GetErrors() []string {
-	return a.errors
+	return a.Errors
 }
 
 func (a *Analyser) GetWarnings() []string {
-	return a.warnings
+	return a.Warnings
 }
