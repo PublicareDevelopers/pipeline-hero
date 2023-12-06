@@ -59,14 +59,14 @@ func TestAnalyser_SetGoVersion(t *testing.T) {
 func TestAnalyser_PushError(t *testing.T) {
 	a := NewAnalyser()
 
-	if len(a.errors) != 0 {
-		t.Errorf("PushError() = %v, want %v", len(a.errors), 0)
+	if len(a.Errors) != 0 {
+		t.Errorf("PushError() = %v, want %v", len(a.Errors), 0)
 	}
 
 	a.PushError("error 1")
 
-	if len(a.errors) != 1 {
-		t.Errorf("PushError() = %v, want %v", len(a.errors), 1)
+	if len(a.Errors) != 1 {
+		t.Errorf("PushError() = %v, want %v", len(a.Errors), 1)
 	}
 
 	errors := a.GetErrors()
@@ -83,14 +83,14 @@ func TestAnalyser_PushError(t *testing.T) {
 func TestAnalyser_PushWarning(t *testing.T) {
 	a := NewAnalyser()
 
-	if len(a.warnings) != 0 {
-		t.Errorf("PushWarning() = %v, want %v", len(a.warnings), 0)
+	if len(a.Warnings) != 0 {
+		t.Errorf("PushWarning() = %v, want %v", len(a.Warnings), 0)
 	}
 
 	a.PushWarning("warning 1")
 
-	if len(a.warnings) != 1 {
-		t.Errorf("PushWarning() = %v, want %v", len(a.warnings), 1)
+	if len(a.Warnings) != 1 {
+		t.Errorf("PushWarning() = %v, want %v", len(a.Warnings), 1)
 	}
 
 	warnings := a.GetWarnings()

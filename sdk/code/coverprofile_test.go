@@ -19,16 +19,16 @@ func TestAnalyser_SetCoverProfile(t *testing.T) {
 		t.Errorf("Error: coverProfile is empty\n")
 	}
 
-	if len(a.profiles) == 0 {
+	if len(a.Profiles) == 0 {
 		t.Errorf("Error: profiles is empty\n")
 	}
 
-	if len(a.profiles) != len(lines) {
+	if len(a.Profiles) != len(lines) {
 		t.Errorf("Error: profiles is not correct\n")
 	}
 
 	//test the result of datacatalogapi/sdk/activities
-	testProfile := a.profiles[9]
+	testProfile := a.Profiles[9]
 	if testProfile.Folder != "datacatalogapi/sdk/activities" {
 		t.Errorf("Error: folder is wrong: %s\n", testProfile.Folder)
 	}
@@ -42,7 +42,7 @@ func TestAnalyser_SetCoverProfile(t *testing.T) {
 	}
 
 	//test the first one with no coverage
-	testProfile = a.profiles[0]
+	testProfile = a.Profiles[0]
 	if testProfile.Folder != "datacatalogapi/sdk/awslog" {
 		t.Errorf("Error: folder is wrong: %s\n", testProfile.Folder)
 	}

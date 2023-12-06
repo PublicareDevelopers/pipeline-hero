@@ -25,7 +25,7 @@ func (a *Analyser) parseCoverProfile() {
 			profile.Duration = 0
 
 			a.lock.Lock()
-			a.profiles = append(a.profiles, profile)
+			a.Profiles = append(a.Profiles, profile)
 			a.lock.Unlock()
 
 			continue
@@ -58,7 +58,7 @@ func (a *Analyser) parseCoverProfile() {
 		profile.Coverage = convertedValue
 
 		a.lock.Lock()
-		a.profiles = append(a.profiles, profile)
+		a.Profiles = append(a.Profiles, profile)
 		a.lock.Unlock()
 	}
 }
