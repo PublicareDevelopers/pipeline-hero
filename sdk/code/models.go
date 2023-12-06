@@ -88,10 +88,10 @@ type Retract struct {
 func NewAnalyser() *Analyser {
 	return &Analyser{
 		Threshold: 75.0,
+		Profiles:  make([]Profile, 0),
+		Errors:    make([]string, 0),
+		Warnings:  make([]string, 0),
 		Updates:   make([]RequireUpdate, 0),
-		profiles:  make([]Profile, 0),
-		errors:    make([]string, 0),
-		warnings:  make([]string, 0),
 		lock:      &sync.Mutex{},
 	}
 }
@@ -159,26 +159,26 @@ func (a *Analyser) SetGoVersion(goVersion string) *Analyser {
 
 func (a *Analyser) PushError(err string) *Analyser {
 	a.lock.Lock()
-	a.errors = append(a.errors, err)
+	a.Errors = append(a.Errors, err)
 	a.lock.Unlock()
 	return a
 }
 
 func (a *Analyser) PushWarning(warning string) *Analyser {
 	a.lock.Lock()
-	a.warnings = append(a.warnings, warning)
+	a.Warnings = append(a.Warnings, warning)
 	a.lock.Unlock()
 	return a
 }
 
 func (a *Analyser) GetErrors() []string {
-	return a.errors
+	return a.Errors
 }
 
 func (a *Analyser) GetWarnings() []string {
-	return a.warnings
+	return a.Warnings
 }
 
 func (a *Analyser) GetProfiles() []Profile {
-	return a.profiles
+	return a.Profiles
 }
