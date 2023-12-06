@@ -10,3 +10,12 @@ func GetDependencyGraph() (string, error) {
 
 	return string(out), nil
 }
+
+func AnalyseModule() (string, error) {
+	out, err := exec.Command("go", "mod", "edit", "--json").Output()
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), nil
+}
