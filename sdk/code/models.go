@@ -20,10 +20,10 @@ type Analyser struct {
 	VulnCheck        string
 	HasVuln          bool
 	HasErrors        bool
-	errors           []string
-	warnings         []string
-	profiles         []Profile
-	dependencies     []Dependency
+	Errors           []string
+	Warnings         []string
+	Profiles         []Profile
+	dependencies     []Dependency //Deprecated: use Updates instead
 	lock             *sync.Mutex
 }
 
