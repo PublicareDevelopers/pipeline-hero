@@ -1,8 +1,13 @@
 package slack
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/platform"
+	"os"
+	"strconv"
+	"time"
 )
 
 func (client *Client) StartConversation(analyser *code.Analyser, pipeType string) error {
@@ -99,6 +104,48 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 	err = client.SendProgressSlackBlocks(client.Blocks)
 	if err != nil {
 		fmt.Println(err)
+	}
+
+	platformClient := platform.New()
+	var analyserMap map[string]any
+
+	analyserJson, err := json.Marshal(analyser)
+	if err != nil {
+		//TODO push a warning
+		return nil
+	}
+
+	err = json.Unmarshal(analyserJson, &analyserMap)
+	if err != nil {
+		//TODO push a warning
+		return nil
+	}
+
+	build := 0
+	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
+	if buildNumber != "" {
+		//convert string to int
+		build, _ = strconv.Atoi(buildNumber)
+	}
+
+	repoFullName := os.Getenv("BITBUCKET_REPO_FULL_NAME")
+	branchName := os.Getenv("BITBUCKET_BRANCH")
+
+	platformClient.SetRequest(platform.Request{
+		Language: "go",
+		RunAt:    time.Now().UTC().String(),
+		Build:    build,
+		Analyser: analyserMap,
+		Context: platform.Context{
+			Repository: repoFullName,
+			Branch:     branchName,
+			ThreadTs:   client.ThreadTs,
+		},
+	})
+
+	_, err = platformClient.Do()
+	if err != nil {
+		return err
 	}
 
 	return nil

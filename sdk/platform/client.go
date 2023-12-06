@@ -1,6 +1,12 @@
 package platform
 
-import "os"
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+)
 
 func New() *Client {
 	return &Client{
@@ -16,5 +22,34 @@ func (c *Client) SetRequest(request Request) {
 func (c *Client) Do() (Response, error) {
 	resp := Response{}
 
-	return resp, nil
+	payload, err := json.Marshal(c.request)
+	if err != nil {
+		return resp, err
+	}
+
+	fmt.Printf("posting to %s\n", c.origin+"push")
+
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", c.origin+"push", bytes.NewReader(payload))
+	if err != nil {
+		return resp, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", c.token)
+
+	response, err := client.Do(req)
+	if err != nil {
+		return resp, err
+	}
+
+	if response.StatusCode >= 300 {
+		return resp, fmt.Errorf("error status: %s", response.Status)
+	}
+
+	defer response.Body.Close()
+
+	err = json.NewDecoder(response.Body).Decode(&resp)
+
+	return resp, err
 }
