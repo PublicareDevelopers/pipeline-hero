@@ -102,37 +102,6 @@ func NewClient() (*Client, error) {
 	}, nil
 }
 
-func (client *Client) list() ([]any, error) {
-	var bearer = "Bearer " + client.OAuthToken
-	req, err := http.NewRequest("GET", "https://slack.com/api/conversations.list", nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Content-Type", "application/json; charset=utf-8")
-	req.Header.Add("Authorization", bearer)
-
-	var result map[string]any
-
-	httpClient := &http.Client{}
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.NewDecoder(resp.Body).Decode(&result)
-
-	if err != nil {
-		return nil, err
-	}
-
-	channels, ok := result["channels"]
-	if !ok {
-		return nil, err
-	}
-
-	return channels.([]any), nil
-}
-
 func (client *Client) SendProgressSlackBlocks(blocks []map[string]any) error {
 	err := client.sendSlackBlocks(client.Channel, blocks)
 	if err != nil {

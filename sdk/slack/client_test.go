@@ -20,20 +20,3 @@ func TestSendProgressSlackMessage(t *testing.T) {
 		t.Error(err)
 	}
 }
-
-func TestList(t *testing.T) {
-	client, err := NewTestClient()
-	if err != nil {
-		t.Error(err)
-	}
-
-	channels, err := client.list()
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if len(channels) == 0 {
-		t.Error("expected channels, got 0")
-	}
-}
