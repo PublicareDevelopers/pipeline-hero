@@ -27,11 +27,12 @@ func (c *Client) Do() (Response, error) {
 		return resp, err
 	}
 
-	fmt.Printf("posting to %s\n", c.origin+"push")
+	fmt.Print("pushing data to platform")
 
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", c.origin+"push", bytes.NewReader(payload))
 	if err != nil {
+		fmt.Printf("Error creating request: %s", err)
 		return resp, err
 	}
 
@@ -40,6 +41,7 @@ func (c *Client) Do() (Response, error) {
 
 	response, err := client.Do(req)
 	if err != nil {
+		fmt.Printf("Error sending request: %s", err)
 		return resp, err
 	}
 
