@@ -130,6 +130,7 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 
 	repoFullName := os.Getenv("BITBUCKET_REPO_FULL_NAME")
 	branchName := os.Getenv("BITBUCKET_BRANCH")
+	projectName := os.Getenv("BITBUCKET_PROJECT_KEY")
 
 	platformClient.SetRequest(platform.Request{
 		Language: "go",
@@ -137,6 +138,7 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 		Build:    build,
 		Analyser: analyserMap,
 		Context: platform.Context{
+			Project:    projectName,
 			Repository: repoFullName,
 			Branch:     branchName,
 			ThreadTs:   client.ThreadTs,
