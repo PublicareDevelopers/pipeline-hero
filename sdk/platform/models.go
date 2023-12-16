@@ -15,6 +15,7 @@ type Request struct {
 }
 
 type Context struct {
+	Project    string `json:"project"`
 	Repository string `json:"repository"`
 	Branch     string `json:"branch"`
 	ThreadTs   string `json:"thread_ts"`
