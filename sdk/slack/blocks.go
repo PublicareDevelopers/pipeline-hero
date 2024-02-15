@@ -31,6 +31,22 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 		client.Blocks = append(client.Blocks, getDividerBlock())
 	}
 
+	if origin != "" {
+		//make sure we have https, not only http
+		if strings.HasPrefix(origin, "http://") {
+			origin = strings.Replace(origin, "http://", "https://", 1)
+		}
+
+		pipeLink := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/pipelines/results/%s", origin, buildNumber)),
+			},
+		}
+		client.Blocks = append(client.Blocks, pipeLink)
+	}
+
 	dependencyUpdatesMsg := "no dependency updates needed"
 
 	if len(analyser.Updates) > 0 {
@@ -78,23 +94,43 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 		client.Blocks = append(client.Blocks, warningsBlock)
 	}
 
-	if origin == "" {
-		return nil
-	}
+	if analyser.TestResult != "" {
+		testResultBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf("*Test result:*\n"),
+			},
+		}
+		client.Blocks = append(client.Blocks, testResultBlock)
+		client.Blocks = append(client.Blocks, getDividerBlock())
 
-	//make sure we have https, not only http
-	if strings.HasPrefix(origin, "http://") {
-		origin = strings.Replace(origin, "http://", "https://", 1)
-	}
+		//split analyser.TestResult in text blocks not longer than 3000 characters
+		//slack has a limit of 3000 characters per text block
 
-	pipeLink := map[string]any{
-		"type": "section",
-		"text": map[string]any{
-			"type": "mrkdwn",
-			"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/pipelines/results/%s", origin, buildNumber)),
-		},
+		testResultMsg := analyser.TestResult
+		for len(testResultMsg) > 3000 {
+			testResultBlock = map[string]any{
+				"type": "section",
+				"text": map[string]any{
+					"type": "mrkdwn",
+					"text": testResultMsg[:3000],
+				},
+			}
+			client.Blocks = append(client.Blocks, testResultBlock)
+			testResultMsg = testResultMsg[3000:]
+		}
+
+		testResultBlock = map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": testResultMsg,
+			},
+		}
+
+		client.Blocks = append(client.Blocks, testResultBlock)
 	}
-	client.Blocks = append(client.Blocks, pipeLink)
 
 	return nil
 }
