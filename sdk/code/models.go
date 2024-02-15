@@ -22,6 +22,7 @@ type Analyser struct {
 	HasErrors        bool
 	Errors           []string
 	Warnings         []string
+	TestResult       string
 	Profiles         []Profile
 	dependencies     []Dependency //Deprecated: use Updates instead
 	lock             *sync.Mutex

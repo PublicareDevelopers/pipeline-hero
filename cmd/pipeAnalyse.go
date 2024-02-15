@@ -127,7 +127,9 @@ func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {
 	out, err := exec.Command("go", "test", testSetup, "-v", fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
 	if err != nil {
 		color.Red("Error: %s\n", err)
-		analyser.PushError(fmt.Sprintf("Tests failed:\n%s\nError: %s\n", string(out), err))
+		analyser.TestResult = string(out)
+		color.Red("Tests failed:\n%s\n", string(out))
+		analyser.PushError(fmt.Sprintf("Tests failed:\n%sThe results can be found in the thread or have a look at the pipeline\n", err))
 		return
 	}
 
