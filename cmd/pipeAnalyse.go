@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
+	"regexp"
 	"sync"
 )
 
@@ -127,9 +128,20 @@ func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {
 	out, err := exec.Command("go", "test", testSetup, fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
 	if err != nil {
 		color.Red("Error: %s\n", err)
-		analyser.TestResult = string(out)
 		color.Red("Tests failed:\n%s\n", string(out))
-		analyser.PushError(fmt.Sprintf("Tests failed:\n%sThe results can be found in the thread or have a look at the pipeline\n", err))
+
+		//regex find`FAIL(.*)`gm
+		fails := ""
+
+		reg := regexp.MustCompile(`FAIL(.*)`)
+		matches := reg.FindAllString(string(out), -1)
+		for _, match := range matches {
+			fails += match + "\n"
+		}
+
+		analyser.TestResult = fails
+
+		analyser.PushError(fmt.Sprintf("Tests failed:%s \nThe parsed results can be found in the thread or have a look at the pipeline for the complete output\n", err))
 		return
 	}
 
