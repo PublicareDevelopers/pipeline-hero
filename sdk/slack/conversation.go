@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/platform"
+	"github.com/fatih/color"
 	"os"
 	"strconv"
 	"time"
@@ -147,7 +148,7 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 
 	_, err = platformClient.Do()
 	if err != nil {
-		return err
+		color.Red("error at platform handling: %s\n", err)
 	}
 
 	return nil
