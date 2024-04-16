@@ -1,8 +1,8 @@
 package code
 
 import (
+	"/pipeline-hero/sdk/cmds"
 	"fmt"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/fatih/color"
 	"strings"
 )

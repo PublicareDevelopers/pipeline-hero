@@ -5,10 +5,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
+	"pipeline-hero/sdk/cmds"
 )
 
 // localScanCmd represents the localScan command

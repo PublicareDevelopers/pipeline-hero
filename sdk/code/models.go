@@ -1,9 +1,9 @@
 package code
 
 import (
+	"/pipeline-hero/sdk/cmds"
 	"encoding/json"
 	"fmt"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"sync"
 )
 

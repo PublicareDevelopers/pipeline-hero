@@ -5,11 +5,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
+	"pipeline-hero/sdk/cmds"
+	"pipeline-hero/sdk/code"
 )
 
 // pipePHPAnalyseCmd represents the pipePHPAnalyse command

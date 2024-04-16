@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
 	"github.com/fatih/color"
 	"os"
+	"pipeline-hero/sdk/cmds"
+	"pipeline-hero/sdk/code"
 
 	"github.com/spf13/cobra"
 )
