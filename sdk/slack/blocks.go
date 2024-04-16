@@ -1,10 +1,10 @@
 package slack
 
 import (
-	"/pipeline-hero/sdk/cmds"
-	"/pipeline-hero/sdk/code"
 	"fmt"
 	"os"
+	"pipeline-hero/sdk/cmds"
+	"pipeline-hero/sdk/code"
 	"strings"
 	"time"
 )

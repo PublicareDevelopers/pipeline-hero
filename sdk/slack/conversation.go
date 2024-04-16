@@ -1,12 +1,12 @@
 package slack
 
 import (
-	"/pipeline-hero/sdk/code"
-	"/pipeline-hero/sdk/platform"
 	"encoding/json"
 	"fmt"
 	"github.com/fatih/color"
 	"os"
+	"pipeline-hero/sdk/code"
+	"pipeline-hero/sdk/platform"
 	"strconv"
 	"time"
 )
