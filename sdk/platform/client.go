@@ -63,7 +63,7 @@ func (c *Client) Do() (Response, error) {
 func (c *Client) CreateSecurityTask() (map[string]any, error) {
 	resp := map[string]any{}
 
-	payload, err := json.Marshal(c.request)
+	payload, err := json.Marshal(c.securityFixRequest)
 	if err != nil {
 		return resp, err
 	}
