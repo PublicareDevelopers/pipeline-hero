@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"pipeline-hero/sdk/cmds"
 	"pipeline-hero/sdk/code"
-	"pipeline-hero/sdk/platform"
 	"pipeline-hero/sdk/slack"
 	"regexp"
 	"sync"
@@ -201,26 +200,4 @@ func analyseVulnCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 
 	fmt.Println(vulCheck)
 	analyser.SetVulnCheck(vulCheck)
-}
-
-func sendVulnToPlatform(description string) (map[string]any, error) {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("recovered from panic: sendVulnToPlatform")
-		}
-	}()
-
-	repository := os.Getenv("BITBUCKET_REPO_FULL_NAME")
-	bitbucketProject := os.Getenv("BITBUCKET_PROJECT_KEY")
-
-	platformClient := platform.New()
-
-	platformClient.SetSecurityFixRequest(platform.SecurityFixRequest{
-		Repository:       repository,
-		BitbucketProject: bitbucketProject,
-		Description:      description,
-	})
-
-	return platformClient.CreateSecurityTask()
-
 }

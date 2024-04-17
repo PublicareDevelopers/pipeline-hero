@@ -41,6 +41,14 @@ var pipeJSAnalyseCmd = &cobra.Command{
 			analyser.PushError(audit)
 			slackNotifyError(analyser, "npm audit failed")
 
+			resp, err := sendVulnToPlatform("npm audit failed \n" + err.Error() + "\n" + audit)
+			if err != nil {
+				color.Red("error sending vuln to platform: %s\n", err)
+				return
+			}
+
+			color.Green(fmt.Sprintf("vuln sent to platform: %+v\n", resp))
+
 			os.Exit(255)
 			return
 		}

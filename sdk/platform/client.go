@@ -31,7 +31,7 @@ func (c *Client) Do() (Response, error) {
 		return resp, err
 	}
 
-	fmt.Print("pushing data to platform")
+	fmt.Println("pushing data to platform")
 
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", c.origin+"push", bytes.NewReader(payload))
@@ -68,7 +68,7 @@ func (c *Client) CreateSecurityTask() (map[string]any, error) {
 		return resp, err
 	}
 
-	fmt.Print("pushing data to platform")
+	fmt.Println("pushing data to platform")
 
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", c.origin+"security-fix", bytes.NewReader(payload))
