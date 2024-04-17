@@ -39,3 +39,19 @@ func TestClient_Do(t *testing.T) {
 
 	t.Log(resp)
 }
+
+func TestClient_CreateSecurityTask(t *testing.T) {
+	client := New()
+	client.SetSecurityFixRequest(SecurityFixRequest{
+		Description:      "this is a security fix task from an unit test",
+		BitbucketProject: "PHUTdeveloper",
+		Repository:       "publicaremarketing/ph-unittest",
+	})
+
+	resp, err := client.CreateSecurityTask()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(resp)
+}

@@ -5,10 +5,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
 	"github.com/fatih/color"
 	"os"
+	"pipeline-hero/sdk/cmds"
+	"pipeline-hero/sdk/code"
 
 	"github.com/spf13/cobra"
 )
@@ -40,6 +40,14 @@ var pipeJSAnalyseCmd = &cobra.Command{
 			color.Red("%s\n", err)
 			analyser.PushError(audit)
 			slackNotifyError(analyser, "npm audit failed")
+
+			resp, err := sendVulnToPlatform("npm audit failed \n" + err.Error() + "\n" + audit)
+			if err != nil {
+				color.Red("error sending vuln to platform: %s\n", err)
+				return
+			}
+
+			color.Green(fmt.Sprintf("vuln sent to platform: %+v\n", resp))
 
 			os.Exit(255)
 			return

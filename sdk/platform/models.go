@@ -1,9 +1,16 @@
 package platform
 
 type Client struct {
-	origin  string
-	token   string
-	request Request
+	origin             string
+	token              string
+	request            Request
+	securityFixRequest SecurityFixRequest
+}
+
+type SecurityFixRequest struct {
+	Description      string `json:"description"`
+	BitbucketProject string `json:"bitbucketProject"`
+	Repository       string `json:"repository"`
 }
 
 type Request struct {

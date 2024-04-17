@@ -3,7 +3,7 @@ package code
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
+	"pipeline-hero/sdk/cmds"
 	"sync"
 )
 

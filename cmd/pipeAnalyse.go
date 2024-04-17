@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
-	"github.com/PublicareDevelopers/pipeline-hero/sdk/slack"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
+	"pipeline-hero/sdk/cmds"
+	"pipeline-hero/sdk/code"
+	"pipeline-hero/sdk/slack"
 	"regexp"
 	"sync"
 )
@@ -185,7 +185,16 @@ func analyseVulnCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 	vulCheck, err := cmds.VulnCheck(testSetup)
 	if err != nil {
 		color.Red("%s\n", err)
+		analyser.HasVuln = true
 		analyser.PushError(err.Error())
+		resp, err := sendVulnToPlatform(err.Error())
+		if err != nil {
+			color.Red("error sending vuln to platform: %s\n", err)
+			return
+		}
+
+		color.Green(fmt.Sprintf("vuln sent to platform: %+v\n", resp))
+
 		return
 	}
 
