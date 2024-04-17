@@ -2,9 +2,9 @@ package slack
 
 import (
 	"fmt"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
 	"os"
-	"pipeline-hero/sdk/cmds"
-	"pipeline-hero/sdk/code"
 	"strings"
 	"time"
 )
