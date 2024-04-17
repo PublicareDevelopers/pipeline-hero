@@ -1,4 +1,4 @@
-module pipeline-hero
+module github.com/PublicareDevelopers/pipeline-hero
 
 go 1.22
 

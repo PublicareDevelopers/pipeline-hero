@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/slack"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
-	"pipeline-hero/sdk/cmds"
-	"pipeline-hero/sdk/code"
-	"pipeline-hero/sdk/slack"
 	"regexp"
 	"sync"
 )

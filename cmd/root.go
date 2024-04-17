@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/platform"
 	"os"
-	"pipeline-hero/sdk/platform"
 
 	"github.com/spf13/cobra"
 )
