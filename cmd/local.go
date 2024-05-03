@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var rootDir string
+
 // localCmd represents the local command
 var localCmd = &cobra.Command{
 	Use:   "local",
@@ -20,13 +22,7 @@ var localCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(localCmd)
 
-	// Here you will define your flags and configuration settings.
+	localCmd.PersistentFlags().StringVarP(&rootDir, "root", "r", "", "root directory of the project")
+	_ = localCmd.MarkPersistentFlagRequired("root")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// localCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// localCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
