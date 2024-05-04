@@ -1,7 +1,18 @@
 package qa
 
 type ServerlessYML struct {
-	Functions map[string]interface{} `yaml:"functions"`
+	FrameworkVersion string                                  `yaml:"frameworkVersion"`
+	Provider         ServerlessProviderDefinition            `yaml:"provider"`
+	Functions        map[string]ServerlessFunctionDefinition `yaml:"functions"`
+}
+
+type ServerlessProviderDefinition struct {
+	Name         string            `yaml:"name"`
+	Stage        string            `yaml:"stage"`
+	Runtime      string            `yaml:"runtime"`
+	Architecture string            `yaml:"architecture"`
+	Region       string            `yaml:"region"`
+	Environment  map[string]string `yaml:"environment"`
 }
 
 type ServerlessFunctionDefinition struct {
