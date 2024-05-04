@@ -7,12 +7,12 @@ type ServerlessYML struct {
 }
 
 type ServerlessProviderDefinition struct {
-	Name         string `yaml:"name"`
-	Stage        string `yaml:"stage"`
-	Runtime      string `yaml:"runtime"`
-	Architecture string `yaml:"architecture"`
-	Region       string `yaml:"region"`
-	Environment  map[string]string
+	Name         string            `yaml:"name"`
+	Stage        string            `yaml:"stage"`
+	Runtime      string            `yaml:"runtime"`
+	Architecture string            `yaml:"architecture"`
+	Region       string            `yaml:"region"`
+	Environment  map[string]string `yaml:"environment"`
 }
 
 type ServerlessFunctionDefinition struct {

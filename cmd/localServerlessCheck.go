@@ -10,19 +10,24 @@ import (
 	"os"
 )
 
+var warnLevelMemory int
+
 // localServerlessCheckCmd represents the localServerlessCheck command
 var localServerlessCheckCmd = &cobra.Command{
 	Use:   "check-serverless",
 	Short: "checking the serverless configs",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		definitions, err := qa.ServerlessQA(rootDir)
+		serverlessCheck, err := qa.ServerlessQA(rootDir, qa.WarnLevels{
+			FunctionsMemorySize: warnLevelMemory,
+		})
+
 		if err != nil {
 			color.Red("Error: %v", err)
 			os.Exit(1)
 		}
 
-		for _, def := range definitions {
+		for _, def := range serverlessCheck.Definitions {
 			if len(def.Errors) > 0 {
 				color.Red("%s", def.File)
 				for _, e := range def.Errors {
@@ -41,19 +46,18 @@ var localServerlessCheckCmd = &cobra.Command{
 				color.White("-------------------")
 			}
 		}
+
+		if len(serverlessCheck.MissingVars) > 0 {
+			color.Yellow("Missing environment variables:")
+			for _, v := range serverlessCheck.MissingVars {
+				color.Yellow(v)
+			}
+		}
 	},
 }
 
 func init() {
 	localCmd.AddCommand(localServerlessCheckCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// localServerlessCheckCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// localServerlessCheckCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	localServerlessCheckCmd.Flags().IntVarP(&warnLevelMemory, "warn-level-memory", "w", 4096, "Memory size warning level")
 }
