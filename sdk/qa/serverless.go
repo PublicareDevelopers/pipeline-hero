@@ -25,11 +25,14 @@ type WarnLevels struct {
 
 type ServerlessCheck struct {
 	Definitions map[string]DefinitionInfo
-	MissingVars []string
+	MissingVars map[string][]string
 }
 
 func ServerlessQA(rootDir string, warnLevels WarnLevels) (ServerlessCheck, error) {
-	serverlessCheck := ServerlessCheck{}
+	serverlessCheck := ServerlessCheck{
+		Definitions: make(map[string]DefinitionInfo),
+		MissingVars: make(map[string][]string),
+	}
 
 	// Schritt 1: Lesen Sie alle YML-Definitionen ein
 	definitions := make(map[string]DefinitionInfo)
@@ -71,19 +74,17 @@ func ServerlessQA(rootDir string, warnLevels WarnLevels) (ServerlessCheck, error
 
 	serverlessCheck.Definitions = definitions
 
-	// Schritt 3: Überprüfen Sie die Umgebungsvariablen
-	missingVars, err := CheckEnvVars(rootDir, definitions)
+	// Schritt 3: Überprüfen Sie die Codebestandteile
+	err = AnalyseCode(rootDir, &serverlessCheck)
 	if err != nil {
 		return serverlessCheck, err
 	}
 
-	serverlessCheck.MissingVars = missingVars
-
 	return serverlessCheck, nil
 }
 
-func CheckEnvVars(rootDir string, definitions map[string]DefinitionInfo) ([]string, error) {
-	envVars := make(map[string]bool)
+func AnalyseCode(rootDir string, check *ServerlessCheck) error {
+	envVars := make(map[string][]string)
 
 	// Step 1: Walk through all Go files
 	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
@@ -112,7 +113,12 @@ func CheckEnvVars(rootDir string, definitions map[string]DefinitionInfo) ([]stri
 							//remove the "" from the string
 							envVar := v.Value[1 : len(v.Value)-1]
 
-							envVars[envVar] = true
+							//check if envVars[envVar] already exists
+							if _, ok := envVars[envVar]; !ok {
+								envVars[envVar] = []string{}
+							}
+
+							envVars[envVar] = append(envVars[envVar], path)
 						}
 					}
 				}
@@ -125,14 +131,14 @@ func CheckEnvVars(rootDir string, definitions map[string]DefinitionInfo) ([]stri
 	})
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Step 4: Compare the collected env vars with the ones defined in the YML files
-	missingVars := []string{}
-	for envVar := range envVars {
+	missingVars := make(map[string][]string)
+	for envVar, occurrences := range envVars {
 		found := false
-		for _, definitionInfo := range definitions {
+		for _, definitionInfo := range check.Definitions {
 			for name := range definitionInfo.Def.Provider.Environment {
 				if name == envVar {
 					found = true
@@ -143,15 +149,29 @@ func CheckEnvVars(rootDir string, definitions map[string]DefinitionInfo) ([]stri
 			if found {
 				break
 			}
+
+			for _, function := range definitionInfo.Def.Functions {
+				for name := range function.Environment {
+					if name == envVar {
+						found = true
+						break
+					}
+				}
+
+				if found {
+					break
+				}
+			}
 		}
 
 		if !found {
-			missingVars = append(missingVars, envVar)
+			missingVars[envVar] = occurrences
 		}
 	}
 
-	// Step 5: Return the missing env vars
-	return missingVars, nil
+	check.MissingVars = missingVars
+
+	return nil
 }
 
 func ReadYMLDefinitions(dir string, definitions map[string]DefinitionInfo) error {

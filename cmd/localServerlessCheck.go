@@ -4,6 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/qa"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -36,7 +37,7 @@ var localServerlessCheckCmd = &cobra.Command{
 			}
 
 			if len(def.Warnings) > 0 {
-				color.Yellow("%s", def.File)
+				color.White("%s", def.File)
 				for _, w := range def.Warnings {
 					color.Yellow(w)
 				}
@@ -48,9 +49,13 @@ var localServerlessCheckCmd = &cobra.Command{
 		}
 
 		if len(serverlessCheck.MissingVars) > 0 {
-			color.Yellow("Missing environment variables:")
-			for _, v := range serverlessCheck.MissingVars {
-				color.Yellow(v)
+			color.White("\nMissing environment variables:")
+			for missingEnvVar, occurrences := range serverlessCheck.MissingVars {
+				color.Yellow(fmt.Sprintf("%s | defined in: \n", missingEnvVar))
+				for _, occurrence := range occurrences {
+					color.Yellow(occurrence)
+				}
+				color.White("-------------------")
 			}
 		}
 	},
