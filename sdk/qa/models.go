@@ -16,11 +16,12 @@ type ServerlessProviderDefinition struct {
 }
 
 type ServerlessFunctionDefinition struct {
-	MemorySize int                         `yaml:"memorySize"`
-	Timeout    int                         `yaml:"timeout"`
-	Handler    string                      `yaml:"handler"`
-	Package    ServerlessPackageDefinition `yaml:"package"`
-	Events     []interface{}               `yaml:"events"`
+	MemorySize  int                         `yaml:"memorySize"`
+	Timeout     int                         `yaml:"timeout"`
+	Handler     string                      `yaml:"handler"`
+	Package     ServerlessPackageDefinition `yaml:"package"`
+	Events      []interface{}               `yaml:"events"`
+	Environment map[string]string           `yaml:"environment"`
 }
 
 type ServerlessPackageDefinition struct {
