@@ -36,3 +36,7 @@ func CheckLocalBuild(rootDir string) (string, error) {
 func CheckUnusedZips(rootDir string) (string, error) {
 	return qa.CheckUnusedZips(rootDir)
 }
+
+func CheckFunctionDefinitions(rootDir string) (string, error) {
+	return qa.CheckFunctionDefinitions(rootDir)
+}
