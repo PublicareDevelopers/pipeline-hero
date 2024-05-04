@@ -15,7 +15,14 @@ func CheckBuild(rootDir string) (string, error) {
 		return "", err
 	}
 
-	return yml + "\n" + localBuild, nil
+	unusedZips, err := CheckUnusedZips(rootDir)
+	if err != nil {
+		return "", err
+	}
+
+	return yml + "\n" +
+		localBuild + "\n" +
+		unusedZips, nil
 }
 
 func CheckYml(rootDir string) (string, error) {
@@ -24,4 +31,8 @@ func CheckYml(rootDir string) (string, error) {
 
 func CheckLocalBuild(rootDir string) (string, error) {
 	return qa.CheckLocalBuild(rootDir)
+}
+
+func CheckUnusedZips(rootDir string) (string, error) {
+	return qa.CheckUnusedZips(rootDir)
 }
