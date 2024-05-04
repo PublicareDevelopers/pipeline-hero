@@ -8,6 +8,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
+	"time"
 )
 
 // localBuildCheckCmd represents the localBuildCheck command
@@ -16,7 +17,13 @@ var localBuildCheckCmd = &cobra.Command{
 	Short: "check the project config and local build status",
 	Long:  `to can check, the project must follow some setup rules`,
 	Run: func(cmd *cobra.Command, args []string) {
+		start := time.Now()
+
 		res, err := cmds.CheckLocalBuild(rootDir)
+
+		duration := time.Since(start)
+		color.Green("local build duration: %v", duration)
+
 		if err != nil {
 			color.Red("Error: %v", err)
 			color.Red(res)
