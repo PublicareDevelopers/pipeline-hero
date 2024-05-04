@@ -18,6 +18,44 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 	client.Blocks = append(client.Blocks, getTestDurationBlock(analyser.GetProfiles()))
 	client.Blocks = append(client.Blocks, getDividerBlock())
 
+	if analyser.TestResult != "" {
+		testResultBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf("*Test result:*\n"),
+			},
+		}
+		client.Blocks = append(client.Blocks, testResultBlock)
+		client.Blocks = append(client.Blocks, getDividerBlock())
+
+		//split analyser.TestResult in text blocks not longer than 3000 characters
+		//slack has a limit of 3000 characters per text block
+
+		testResultMsg := analyser.TestResult
+		for len(testResultMsg) > 3000 {
+			testResultBlock = map[string]any{
+				"type": "section",
+				"text": map[string]any{
+					"type": "mrkdwn",
+					"text": testResultMsg[:3000],
+				},
+			}
+			client.Blocks = append(client.Blocks, testResultBlock)
+			testResultMsg = testResultMsg[3000:]
+		}
+
+		testResultBlock = map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": testResultMsg,
+			},
+		}
+
+		client.Blocks = append(client.Blocks, testResultBlock)
+	}
+
 	toolchain := analyser.Module.Toolchain
 	if toolchain != "" {
 		goToolchainVersionBlock := map[string]any{
@@ -92,44 +130,6 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 			},
 		}
 		client.Blocks = append(client.Blocks, warningsBlock)
-	}
-
-	if analyser.TestResult != "" {
-		testResultBlock := map[string]any{
-			"type": "section",
-			"text": map[string]any{
-				"type": "mrkdwn",
-				"text": fmt.Sprintf("*Test result:*\n"),
-			},
-		}
-		client.Blocks = append(client.Blocks, testResultBlock)
-		client.Blocks = append(client.Blocks, getDividerBlock())
-
-		//split analyser.TestResult in text blocks not longer than 3000 characters
-		//slack has a limit of 3000 characters per text block
-
-		testResultMsg := analyser.TestResult
-		for len(testResultMsg) > 3000 {
-			testResultBlock = map[string]any{
-				"type": "section",
-				"text": map[string]any{
-					"type": "mrkdwn",
-					"text": testResultMsg[:3000],
-				},
-			}
-			client.Blocks = append(client.Blocks, testResultBlock)
-			testResultMsg = testResultMsg[3000:]
-		}
-
-		testResultBlock = map[string]any{
-			"type": "section",
-			"text": map[string]any{
-				"type": "mrkdwn",
-				"text": testResultMsg,
-			},
-		}
-
-		client.Blocks = append(client.Blocks, testResultBlock)
 	}
 
 	return nil
