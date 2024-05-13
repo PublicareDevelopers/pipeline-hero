@@ -14,7 +14,7 @@ import (
 // localYmlCheckCmd represents the localYmlCheck command
 var localYmlCheckCmd = &cobra.Command{
 	Use:   "check-yml",
-	Short: "",
+	Short: "check the serverless yml files searching for not available binaries in bin/ folder",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		res, err := cmds.CheckYml(rootDir)

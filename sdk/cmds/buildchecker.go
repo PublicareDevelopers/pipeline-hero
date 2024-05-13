@@ -4,6 +4,8 @@ import (
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/qa"
 )
 
+// CheckBuild checks the build
+// TODO: Make it better than this :)
 func CheckBuild(rootDir string) (string, error) {
 	yml, err := CheckYml(rootDir)
 	if err != nil {
@@ -39,4 +41,8 @@ func CheckUnusedZips(rootDir string) (string, error) {
 
 func CheckFunctionDefinitions(rootDir string) (string, error) {
 	return qa.CheckFunctionDefinitions(rootDir)
+}
+
+func CheckResourceDefinitions(rootDir string) (string, error) {
+	return qa.CheckResourceDefinitions(rootDir)
 }
