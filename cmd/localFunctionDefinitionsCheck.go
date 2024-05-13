@@ -14,7 +14,7 @@ import (
 // localFunctionDefinitionsCheckCmd represents the localFunctionDefinitionsCheck command
 var localFunctionDefinitionsCheckCmd = &cobra.Command{
 	Use:   "check-functions",
-	Short: "compare teststage and productivestage",
+	Short: "compare teststage and productivestage functions in yml files",
 	Long:  `make sure that all functions defined in teststage are also defined in productivestage`,
 	Run: func(cmd *cobra.Command, args []string) {
 		res, err := cmds.CheckFunctionDefinitions(rootDir)

@@ -86,3 +86,83 @@ func CheckFunctionDefinitions(rootDir string) (string, error) {
 
 	return output.String(), fmt.Errorf("missing functions found")
 }
+
+func CheckResourceDefinitions(rootDir string) (string, error) {
+	var output strings.Builder
+
+	// Step 1: Collect all resource names from teststage yml files
+	testResources := make(map[string]ResourceInfo)
+	err := filepath.Walk(filepath.Join(rootDir, "pipelines", "teststage"), func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if filepath.Ext(path) == ".yml" {
+			file, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var yml ServerlessYML
+			err = yaml.Unmarshal(file, &yml)
+			if err != nil {
+				return err
+			}
+
+			for resourceName := range yml.Resources.Definitions {
+				testResources[resourceName] = ResourceInfo{Path: resourceName, File: path}
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	// Step 2: Check each resource name against all productivestage yml files
+	err = filepath.Walk(filepath.Join(rootDir, "pipelines", "productivestage"), func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if filepath.Ext(path) == ".yml" {
+			file, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			var yml ServerlessYML
+			err = yaml.Unmarshal(file, &yml)
+			if err != nil {
+				return err
+			}
+
+			for resourceName := range yml.Resources.Definitions {
+				if _, ok := testResources[resourceName]; ok {
+					delete(testResources, resourceName)
+				}
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	output.WriteString(fmt.Sprintf("checking %d resources\n", len(testResources)))
+
+	// Step 3: Collect all missing resource names
+	for _, resourceInfo := range testResources {
+		output.WriteString(fmt.Sprintf("Missing productive resource: %s, defined in %s\n", resourceInfo.Path, resourceInfo.File))
+	}
+
+	if output.Len() == 0 {
+		return "No missing resources found", nil
+	}
+
+	return output.String(), fmt.Errorf("missing resources found")
+}

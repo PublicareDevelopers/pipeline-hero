@@ -4,6 +4,7 @@ type ServerlessYML struct {
 	FrameworkVersion string                                  `yaml:"frameworkVersion"`
 	Provider         ServerlessProviderDefinition            `yaml:"provider"`
 	Functions        map[string]ServerlessFunctionDefinition `yaml:"functions"`
+	Resources        ServerlessResource                      `yaml:"resources"`
 }
 
 type ServerlessProviderDefinition struct {
@@ -24,8 +25,22 @@ type ServerlessFunctionDefinition struct {
 	Environment map[string]string           `yaml:"environment"`
 }
 
+type ServerlessResource struct {
+	Definitions map[string]ServerlessResourceDefinition `yaml:"Resources"`
+}
+
+type ServerlessResourceDefinition struct {
+	Type       string         `yaml:"Type"`
+	Properties map[string]any `yaml:"Properties"`
+}
+
 type ServerlessPackageDefinition struct {
 	Artifact string `yaml:"artifact"`
+}
+
+type ResourceInfo struct {
+	Path string
+	File string
 }
 
 type FunctionInfo struct {
