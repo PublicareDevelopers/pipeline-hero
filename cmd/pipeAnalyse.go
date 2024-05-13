@@ -22,7 +22,7 @@ var envVariables map[string]string
 // pipeAnalyseCmd represents the pipeAnalyse command
 var pipeAnalyseCmd = &cobra.Command{
 	Use:   "analyse",
-	Short: "",
+	Short: "running a pipeline-hero analyse for go; will exit with an error if things are not as expected",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		for key, value := range envVariables {
