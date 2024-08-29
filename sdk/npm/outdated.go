@@ -74,31 +74,31 @@ func NewOutDate(name, current, wanted, latest, dependent string) (*OutDate, erro
 func (o *OutDate) Rate() {
 	if o.NewMajorVersionAvailable() {
 		o.Rating.StatusCode = OutDateRatingNewMajorVersionAvailable
-		o.Rating.Message = fmt.Sprintf("%s %s | have %s", OutDateRatingMessageNewMajorVersionAvailable, o.Latest, o.Current)
+		o.Rating.Message = fmt.Sprintf("%s %s | have %s", OutDateRatingMessageNewMajorVersionAvailable, o.Latest, o.Wanted)
 	} else if o.NewMinorVersionAvailable() {
 		o.Rating.StatusCode = OutDateRatingNewMinorVersionAvailable
-		o.Rating.Message = fmt.Sprintf("%s %s | have %s", OutDateRatingMessageNewMinorVersionAvailable, o.Latest, o.Current)
+		o.Rating.Message = fmt.Sprintf("%s %s | have %s", OutDateRatingMessageNewMinorVersionAvailable, o.Latest, o.Wanted)
 	} else if o.NewPatchVersionAvailable() {
 		o.Rating.StatusCode = OutDateRatingNewPatchVersionAvailable
-		o.Rating.Message = fmt.Sprintf("%s %s | have %s", OutDateRatingMessageNewPatchVersionAvailable, o.Latest, o.Current)
+		o.Rating.Message = fmt.Sprintf("%s %s | have %s", OutDateRatingMessageNewPatchVersionAvailable, o.Latest, o.Wanted)
 	} else {
 		o.Rating.StatusCode = OutDateRatingNoNewVersionAvailable
 	}
 }
 
 func (o *OutDate) NewMajorVersionAvailable() bool {
-	return o.CurrentVersion.Major < o.LatestVersion.Major
+	return o.WantedVersion.Major < o.LatestVersion.Major
 }
 
 func (o *OutDate) NewMinorVersionAvailable() bool {
-	return o.CurrentVersion.Major == o.LatestVersion.Major &&
-		o.CurrentVersion.Minor < o.LatestVersion.Minor
+	return o.WantedVersion.Major == o.LatestVersion.Major &&
+		o.WantedVersion.Minor < o.LatestVersion.Minor
 }
 
 func (o *OutDate) NewPatchVersionAvailable() bool {
-	return o.CurrentVersion.Major == o.LatestVersion.Major &&
-		o.CurrentVersion.Minor == o.LatestVersion.Minor &&
-		o.CurrentVersion.Patch < o.LatestVersion.Patch
+	return o.WantedVersion.Major == o.LatestVersion.Major &&
+		o.WantedVersion.Minor == o.LatestVersion.Minor &&
+		o.WantedVersion.Patch < o.LatestVersion.Patch
 }
 
 func ConvertVersion(version string) (*Version, error) {
