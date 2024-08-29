@@ -1,0 +1,313 @@
+{
+  "@codemirror/autocomplete": {
+    "current": "0.18.8",
+    "wanted": "0.18.8",
+    "latest": "6.18.0",
+    "dependent": "foobar"
+  },
+  "@codemirror/basic-setup": {
+    "current": "0.18.2",
+    "wanted": "0.18.2",
+    "latest": "0.20.0",
+    "dependent": "foobar"
+  },
+  "@codemirror/closebrackets": {
+    "current": "0.18.0",
+    "wanted": "0.18.0",
+    "latest": "0.19.2",
+    "dependent": "foobar"
+  },
+  "@codemirror/commands": {
+    "current": "0.18.3",
+    "wanted": "0.18.3",
+    "latest": "6.6.0",
+    "dependent": "foobar"
+  },
+  "@codemirror/comment": {
+    "current": "0.18.1",
+    "wanted": "0.18.1",
+    "latest": "0.19.1",
+    "dependent": "foobar"
+  },
+  "@codemirror/fold": {
+    "current": "0.18.1",
+    "wanted": "0.18.2",
+    "latest": "0.19.4",
+    "dependent": "foobar"
+  },
+  "@codemirror/gutter": {
+    "current": "0.18.4",
+    "wanted": "0.18.4",
+    "latest": "0.19.9",
+    "dependent": "foobar"
+  },
+  "@codemirror/highlight": {
+    "current": "0.18.4",
+    "wanted": "0.18.4",
+    "latest": "0.19.8",
+    "dependent": "foobar"
+  },
+  "@codemirror/history": {
+    "current": "0.18.1",
+    "wanted": "0.18.1",
+    "latest": "0.19.2",
+    "dependent": "foobar"
+  },
+  "@codemirror/lang-css": {
+    "current": "0.18.0",
+    "wanted": "0.18.0",
+    "latest": "6.2.1",
+    "dependent": "foobar"
+  },
+  "@codemirror/lang-html": {
+    "current": "0.18.1",
+    "wanted": "0.18.1",
+    "latest": "6.4.9",
+    "dependent": "foobar"
+  },
+  "@codemirror/lang-javascript": {
+    "current": "0.18.0",
+    "wanted": "0.18.0",
+    "latest": "6.2.2",
+    "dependent": "foobar"
+  },
+  "@codemirror/lang-json": {
+    "current": "0.18.0",
+    "wanted": "0.18.0",
+    "latest": "6.0.1",
+    "dependent": "foobar"
+  },
+  "@codemirror/lang-sql": {
+    "current": "0.18.0",
+    "wanted": "0.18.0",
+    "latest": "6.7.1",
+    "dependent": "foobar"
+  },
+  "@codemirror/language": {
+    "current": "0.18.2",
+    "wanted": "0.18.2",
+    "latest": "6.10.2",
+    "dependent": "foobar"
+  },
+  "@codemirror/lint": {
+    "current": "0.18.4",
+    "wanted": "0.18.6",
+    "latest": "6.8.1",
+    "dependent": "foobar"
+  },
+  "@codemirror/matchbrackets": {
+    "current": "0.18.0",
+    "wanted": "0.18.0",
+    "latest": "0.19.4",
+    "dependent": "foobar"
+  },
+  "@codemirror/rectangular-selection": {
+    "current": "0.18.0",
+    "wanted": "0.18.1",
+    "latest": "0.19.2",
+    "dependent": "foobar"
+  },
+  "@codemirror/search": {
+    "current": "0.18.4",
+    "wanted": "0.18.4",
+    "latest": "6.5.6",
+    "dependent": "foobar"
+  },
+  "@tailwindcss/forms": {
+    "current": "0.3.3",
+    "wanted": "0.3.4",
+    "latest": "0.5.8",
+    "dependent": "foobar"
+  },
+  "@tailwindcss/typography": {
+    "current": "0.4.1",
+    "wanted": "0.4.1",
+    "latest": "0.5.15",
+    "dependent": "foobar"
+  },
+  "alpinejs": {
+    "current": "3.2.1",
+    "wanted": "3.14.1",
+    "latest": "3.14.1",
+    "dependent": "foobar"
+  },
+  "axios": {
+    "current": "0.21.4",
+    "wanted": "0.21.4",
+    "latest": "1.7.5",
+    "dependent": "foobar"
+  },
+  "bootstrap": {
+    "current": "4.6.2",
+    "wanted": "4.6.2",
+    "latest": "5.3.3",
+    "dependent": "foobar"
+  },
+  "chart.js": {
+    "current": "2.9.4",
+    "wanted": "2.9.4",
+    "latest": "4.4.4",
+    "dependent": "foobar"
+  },
+  "eslint": {
+    "current": "7.30.0",
+    "wanted": "7.32.0",
+    "latest": "9.9.1",
+    "dependent": "foobar"
+  },
+  "eslint-import-resolver-webpack": {
+    "current": "0.13.1",
+    "wanted": "0.13.8",
+    "latest": "0.13.8",
+    "dependent": "foobar"
+  },
+  "eslint4b": {
+    "current": "7.30.0",
+    "wanted": "7.32.0",
+    "latest": "7.32.0",
+    "dependent": "foobar"
+  },
+  "eslint4b-prebuilt": {
+    "wanted": "6.7.2",
+    "latest": "6.7.2",
+    "dependent": "foobar"
+  },
+  "jquery": {
+    "current": "3.6.0",
+    "wanted": "3.7.1",
+    "latest": "3.7.1",
+    "dependent": "foobar"
+  },
+  "laravel-echo": {
+    "current": "1.11.0",
+    "wanted": "1.16.1",
+    "latest": "1.16.1",
+    "dependent": "foobar"
+  },
+  "module": {
+    "current": "0.0.1",
+    "wanted": "0.0.1",
+    "latest": "1.2.5",
+    "dependent": "foobar"
+  },
+  "moment": {
+    "current": "2.29.4",
+    "wanted": "2.30.1",
+    "latest": "2.30.1",
+    "dependent": "foobar"
+  },
+  "path-browserify": {
+    "current": "0.0.1",
+    "wanted": "0.0.1",
+    "latest": "1.0.1",
+    "dependent": "foobar"
+  },
+  "portal-vue": {
+    "current": "2.1.7",
+    "wanted": "2.1.7",
+    "latest": "3.0.0",
+    "dependent": "foobar"
+  },
+  "postcss-import": {
+    "current": "14.0.2",
+    "wanted": "14.1.0",
+    "latest": "16.1.0",
+    "dependent": "foobar"
+  },
+  "pusher-js": {
+    "current": "7.0.3",
+    "wanted": "7.6.0",
+    "latest": "8.4.0-rc2",
+    "dependent": "foobar"
+  },
+  "qs": {
+    "current": "6.11.2",
+    "wanted": "6.13.0",
+    "latest": "6.13.0",
+    "dependent": "foobar"
+  },
+  "resolve-url-loader": {
+    "current": "4.0.0",
+    "wanted": "4.0.0",
+    "latest": "5.0.0",
+    "dependent": "foobar"
+  },
+  "sass": {
+    "current": "1.35.2",
+    "wanted": "1.77.8",
+    "latest": "1.77.8",
+    "dependent": "foobar"
+  },
+  "sass-loader": {
+    "current": "8.0.2",
+    "wanted": "8.0.2",
+    "latest": "16.0.1",
+    "dependent": "foobar"
+  },
+  "tailwindcss": {
+    "current": "2.2.4",
+    "wanted": "2.2.19",
+    "latest": "3.4.10",
+    "dependent": "foobar"
+  },
+  "uuid": {
+    "current": "8.3.2",
+    "wanted": "8.3.2",
+    "latest": "10.0.0",
+    "dependent": "foobar"
+  },
+  "vue": {
+    "current": "2.7.16",
+    "wanted": "2.7.16",
+    "latest": "3.4.38",
+    "dependent": "foobar"
+  },
+  "vue-codemirror": {
+    "current": "4.0.6",
+    "wanted": "4.0.6",
+    "latest": "6.1.1",
+    "dependent": "foobar"
+  },
+  "vue-json-viewer": {
+    "current": "2.2.19",
+    "wanted": "2.2.22",
+    "latest": "2.2.22",
+    "dependent": "foobar"
+  },
+  "vue-loader": {
+    "current": "15.11.1",
+    "wanted": "15.11.1",
+    "latest": "17.4.2",
+    "dependent": "foobar"
+  },
+  "vue-markdown-render": {
+    "current": "1.1.2",
+    "wanted": "1.1.3",
+    "latest": "2.2.1",
+    "dependent": "foobar"
+  },
+  "vue-tailwind": {
+    "current": "1.3.3",
+    "wanted": "1.3.3",
+    "latest": "2.5.1",
+    "dependent": "foobar"
+  },
+  "vue-workflow-chart": {
+    "current": "0.4.5",
+    "wanted": "0.4.5",
+    "latest": "0.5.0",
+    "dependent": "foobar"
+  },
+  "vuejs-storage": {
+    "current": "3.1.0",
+    "wanted": "3.1.1",
+    "latest": "3.1.1",
+    "dependent": "foobar"
+  },
+  "vuex": {
+    "current": "3.6.2",
+    "wanted": "3.6.2",
+    "latest": "4.1.0",
+    "dependent": "foobar"
+  }
+}
