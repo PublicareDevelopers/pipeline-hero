@@ -7,6 +7,7 @@ import (
 )
 
 type OutDate struct {
+	Name           string   `json:"name"`
 	Current        string   `json:"current"`
 	CurrentVersion *Version `json:"currentVersion"`
 	Wanted         string   `json:"wanted"`
@@ -22,12 +23,31 @@ type Version struct {
 	Patch int `json:"patch"`
 }
 
-func NewOutDate(current, wanted, latest, dependent string) (*OutDate, error) {
+func NewOutDate(name, current, wanted, latest, dependent string) (*OutDate, error) {
+	currentVersion, err := ConvertVersion(current)
+	if err != nil {
+		return nil, err
+	}
+
+	wantedVersion, err := ConvertVersion(wanted)
+	if err != nil {
+		return nil, err
+	}
+
+	latestVersion, err := ConvertVersion(latest)
+	if err != nil {
+		return nil, err
+	}
+
 	return &OutDate{
-		Current:   current,
-		Wanted:    wanted,
-		Latest:    latest,
-		Dependent: dependent,
+		Name:           name,
+		Current:        current,
+		CurrentVersion: currentVersion,
+		Wanted:         wanted,
+		WantedVersion:  wantedVersion,
+		Latest:         latest,
+		LatestVersion:  latestVersion,
+		Dependent:      dependent,
 	}, nil
 }
 
