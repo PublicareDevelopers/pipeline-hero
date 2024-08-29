@@ -6,21 +6,40 @@ import (
 	"strings"
 )
 
+const (
+	OutDateRatingNewMajorVersionAvailable = 500
+	OutDateRatingNewMinorVersionAvailable = 400
+	OutDateRatingNewPatchVersionAvailable = 300
+	OutDateRatingNoNewVersionAvailable    = 200
+)
+
+const (
+	OutDateRatingMessageNewMajorVersionAvailable = "New major version available"
+	OutDateRatingMessageNewMinorVersionAvailable = "New minor version available"
+	OutDateRatingMessageNewPatchVersionAvailable = "New patch version available"
+)
+
 type OutDate struct {
-	Name           string   `json:"name"`
-	Current        string   `json:"current"`
-	CurrentVersion *Version `json:"currentVersion"`
-	Wanted         string   `json:"wanted"`
-	WantedVersion  *Version `json:"wantedVersion"`
-	Latest         string   `json:"latest"`
-	LatestVersion  *Version `json:"latestVersion"`
-	Dependent      string   `json:"dependent"`
+	Name           string         `json:"name"`
+	Current        string         `json:"current"`
+	CurrentVersion *Version       `json:"currentVersion"`
+	Wanted         string         `json:"wanted"`
+	WantedVersion  *Version       `json:"wantedVersion"`
+	Latest         string         `json:"latest"`
+	LatestVersion  *Version       `json:"latestVersion"`
+	Dependent      string         `json:"dependent"`
+	Rating         *OutDateRating `json:"rating"`
 }
 
 type Version struct {
 	Major int `json:"major"`
 	Minor int `json:"minor"`
 	Patch int `json:"patch"`
+}
+
+type OutDateRating struct {
+	StatusCode int
+	Message    string
 }
 
 func NewOutDate(name, current, wanted, latest, dependent string) (*OutDate, error) {
@@ -48,11 +67,23 @@ func NewOutDate(name, current, wanted, latest, dependent string) (*OutDate, erro
 		Latest:         latest,
 		LatestVersion:  latestVersion,
 		Dependent:      dependent,
+		Rating:         &OutDateRating{StatusCode: 0, Message: ""},
 	}, nil
 }
 
 func (o *OutDate) NewMajorVersionAvailable() bool {
-	return false
+	return o.CurrentVersion.Major < o.LatestVersion.Major
+}
+
+func (o *OutDate) NewMinorVersionAvailable() bool {
+	return o.CurrentVersion.Major == o.LatestVersion.Major &&
+		o.CurrentVersion.Minor < o.LatestVersion.Minor
+}
+
+func (o *OutDate) NewPatchVersionAvailable() bool {
+	return o.CurrentVersion.Major == o.LatestVersion.Major &&
+		o.CurrentVersion.Minor == o.LatestVersion.Minor &&
+		o.CurrentVersion.Patch < o.LatestVersion.Patch
 }
 
 func ConvertVersion(version string) (*Version, error) {
