@@ -71,6 +71,21 @@ func NewOutDate(name, current, wanted, latest, dependent string) (*OutDate, erro
 	}, nil
 }
 
+func (o *OutDate) Rate() {
+	if o.NewMajorVersionAvailable() {
+		o.Rating.StatusCode = OutDateRatingNewMajorVersionAvailable
+		o.Rating.Message = fmt.Sprintf("%s %s | have %s", OutDateRatingMessageNewMajorVersionAvailable, o.Latest, o.Current)
+	} else if o.NewMinorVersionAvailable() {
+		o.Rating.StatusCode = OutDateRatingNewMinorVersionAvailable
+		o.Rating.Message = fmt.Sprintf("%s %s | have %s", OutDateRatingMessageNewMinorVersionAvailable, o.Latest, o.Current)
+	} else if o.NewPatchVersionAvailable() {
+		o.Rating.StatusCode = OutDateRatingNewPatchVersionAvailable
+		o.Rating.Message = fmt.Sprintf("%s %s | have %s", OutDateRatingMessageNewPatchVersionAvailable, o.Latest, o.Current)
+	} else {
+		o.Rating.StatusCode = OutDateRatingNoNewVersionAvailable
+	}
+}
+
 func (o *OutDate) NewMajorVersionAvailable() bool {
 	return o.CurrentVersion.Major < o.LatestVersion.Major
 }
@@ -87,13 +102,25 @@ func (o *OutDate) NewPatchVersionAvailable() bool {
 }
 
 func ConvertVersion(version string) (*Version, error) {
+	//empty string -> means no version
+	if version == "" {
+		return &Version{
+			Major: 0,
+			Minor: 0,
+			Patch: 0,
+		}, nil
+	}
+
+	//remove all after a -, for example we have -rc2
+	version = strings.Split(version, "-")[0]
+
 	versionNumbers := strings.Split(version, ".")
 	if len(versionNumbers) == 0 {
-		return &Version{}, fmt.Errorf("invalid version syntax")
+		return &Version{}, fmt.Errorf("invalid version syntax: %s", version)
 	}
 
 	if len(versionNumbers) > 3 {
-		return &Version{}, fmt.Errorf("invalid version syntax")
+		return &Version{}, fmt.Errorf("invalid version syntax: %s", version)
 	}
 
 	major := 0

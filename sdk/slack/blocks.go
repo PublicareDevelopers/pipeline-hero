@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/npm"
 	"os"
 	"strings"
 	"time"
@@ -130,6 +131,86 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 			},
 		}
 		client.Blocks = append(client.Blocks, warningsBlock)
+	}
+
+	return nil
+}
+
+func (client *Client) BuildJSThreadBlocks(analyser *code.JSAnalyser) error {
+	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
+	origin := os.Getenv("BITBUCKET_GIT_HTTP_ORIGIN")
+
+	if analyser.TestResult != "" {
+		testResultBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf("*Test result:*\n"),
+			},
+		}
+		client.Blocks = append(client.Blocks, testResultBlock)
+		client.Blocks = append(client.Blocks, getDividerBlock())
+
+		//split analyser.TestResult in text blocks not longer than 3000 characters
+		//slack has a limit of 3000 characters per text block
+
+		testResultMsg := analyser.TestResult
+		for len(testResultMsg) > 3000 {
+			testResultBlock = map[string]any{
+				"type": "section",
+				"text": map[string]any{
+					"type": "mrkdwn",
+					"text": testResultMsg[:3000],
+				},
+			}
+			client.Blocks = append(client.Blocks, testResultBlock)
+			testResultMsg = testResultMsg[3000:]
+		}
+
+		testResultBlock = map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": testResultMsg,
+			},
+		}
+
+		client.Blocks = append(client.Blocks, testResultBlock)
+	}
+
+	if len(analyser.OutDates) > 0 {
+		for _, outDate := range analyser.OutDates {
+			//already mentioned
+			if outDate.Rating.StatusCode == npm.OutDateRatingNewMajorVersionAvailable {
+				continue
+			}
+
+			outDateBlock := map[string]any{
+				"type": "section",
+				"text": map[string]any{
+					"type": "mrkdwn",
+					"text": fmt.Sprintf("%s: %s", outDate.Name, outDate.Rating.Message),
+				},
+			}
+
+			client.Blocks = append(client.Blocks, outDateBlock)
+		}
+	}
+
+	if origin != "" {
+		//make sure we have https, not only http
+		if strings.HasPrefix(origin, "http://") {
+			origin = strings.Replace(origin, "http://", "https://", 1)
+		}
+
+		pipeLink := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/pipelines/results/%s", origin, buildNumber)),
+			},
+		}
+		client.Blocks = append(client.Blocks, pipeLink)
 	}
 
 	return nil
@@ -684,4 +765,68 @@ func getTestDurationBlock(profiles []code.Profile) map[string]any {
 		},
 	}
 
+}
+
+func GetNPMVulnChckBlocks(vulnCheck string) ([]map[string]any, error) {
+	returnBlocks := make([]map[string]any, 0)
+
+	//split analyser.VulnCheck in text blocks not longer than 3000 characters
+	//slack has a limit of 3000 characters per text block
+	vulnCheckMsg := vulnCheck
+	for len(vulnCheckMsg) > 3000 {
+		vulnCheckBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": vulnCheckMsg[:3000],
+			},
+		}
+		returnBlocks = append(returnBlocks, vulnCheckBlock)
+		vulnCheckMsg = vulnCheckMsg[3000:]
+	}
+
+	vulnCheckBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": vulnCheckMsg,
+		},
+	}
+	returnBlocks = append(returnBlocks, vulnCheckBlock)
+
+	return returnBlocks, nil
+}
+
+func getJsWarningsBlock(warnings []string) ([]map[string]any, error) {
+	returnBlocks := make([]map[string]any, 0)
+
+	msg := "Warnings:\n"
+	for _, warning := range warnings {
+		msg += fmt.Sprintf(">%s\n", warning)
+	}
+
+	//split msg in text blocks not longer than 3000 characters
+	//slack has a limit of 3000 characters per text block
+	for len(msg) > 3000 {
+		warningsBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": msg[:3000],
+			},
+		}
+		returnBlocks = append(returnBlocks, warningsBlock)
+		msg = msg[3000:]
+	}
+
+	warningsBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": msg,
+		},
+	}
+	returnBlocks = append(returnBlocks, warningsBlock)
+
+	return returnBlocks, nil
 }
