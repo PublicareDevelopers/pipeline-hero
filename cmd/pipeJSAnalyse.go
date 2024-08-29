@@ -101,6 +101,12 @@ func analyseJSVulnCheck(analyser *code.JSAnalyser, wg *sync.WaitGroup) {
 		analyser.SetVulnCheck(audit)
 		analyser.SetVulnCheckFail()
 		analyser.PushError("audit failed")
+		resp, err := sendVulnToPlatform(audit)
+		if err != nil {
+			analyser.PushError("sending vuln to platform failed")
+		}
+
+		color.White(fmt.Sprintf("Vuln Check: %s\n", resp))
 	}
 }
 
