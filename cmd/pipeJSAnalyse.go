@@ -91,6 +91,7 @@ func init() {
 	pipeCmd.AddCommand(pipeJSAnalyseCmd)
 	pipeJSAnalyseCmd.Flags().BoolVarP(&useSlack, "slack", "s", false, "Send results to slack")
 	pipeJSAnalyseCmd.Flags().StringToStringVarP(&envVariables, "env", "e", map[string]string{}, "Environment variables to set")
+	pipeJSAnalyseCmd.Flags().Float64VarP(&coverageThreshold, "coverage-threshold", "c", 75.0, "Coverage threshold to use")
 }
 
 func analyseJSVulnCheck(analyser *code.JSAnalyser, wg *sync.WaitGroup) {

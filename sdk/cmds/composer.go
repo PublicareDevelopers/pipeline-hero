@@ -6,6 +6,30 @@ import (
 	"os/exec"
 )
 
+func RunPHPUnitTest(phpunitCmd string, folder string) (string, error) {
+	out, err := exec.Command(phpunitCmd, folder).Output()
+	if err != nil {
+		fmt.Printf("error: %s\n", err)
+		return string(out), err
+	}
+
+	return string(out), err
+}
+
+func GetComposerOutDates() (string, error) {
+	out, err := exec.Command("composer", "outdated", "-f", "json").Output()
+	if err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			if exitError.ExitCode() == 1 {
+				return string(out), nil
+			}
+		}
+		return string(out), err
+	}
+
+	return string(out), err
+}
+
 func GetComposerAudit() (string, error) {
 	out, err := exec.Command("composer", "audit", "-f", "json").Output()
 	if err != nil {

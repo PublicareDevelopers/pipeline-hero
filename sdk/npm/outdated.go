@@ -2,8 +2,7 @@ package npm
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/helper"
 )
 
 const (
@@ -20,21 +19,15 @@ const (
 )
 
 type OutDate struct {
-	Name           string         `json:"name"`
-	Current        string         `json:"current"`
-	CurrentVersion *Version       `json:"currentVersion"`
-	Wanted         string         `json:"wanted"`
-	WantedVersion  *Version       `json:"wantedVersion"`
-	Latest         string         `json:"latest"`
-	LatestVersion  *Version       `json:"latestVersion"`
-	Dependent      string         `json:"dependent"`
-	Rating         *OutDateRating `json:"rating"`
-}
-
-type Version struct {
-	Major int `json:"major"`
-	Minor int `json:"minor"`
-	Patch int `json:"patch"`
+	Name           string          `json:"name"`
+	Current        string          `json:"current"`
+	CurrentVersion *helper.Version `json:"currentVersion"`
+	Wanted         string          `json:"wanted"`
+	WantedVersion  *helper.Version `json:"wantedVersion"`
+	Latest         string          `json:"latest"`
+	LatestVersion  *helper.Version `json:"latestVersion"`
+	Dependent      string          `json:"dependent"`
+	Rating         *OutDateRating  `json:"rating"`
 }
 
 type OutDateRating struct {
@@ -43,17 +36,17 @@ type OutDateRating struct {
 }
 
 func NewOutDate(name, current, wanted, latest, dependent string) (*OutDate, error) {
-	currentVersion, err := ConvertVersion(current)
+	currentVersion, err := helper.ConvertVersion(current)
 	if err != nil {
 		return nil, err
 	}
 
-	wantedVersion, err := ConvertVersion(wanted)
+	wantedVersion, err := helper.ConvertVersion(wanted)
 	if err != nil {
 		return nil, err
 	}
 
-	latestVersion, err := ConvertVersion(latest)
+	latestVersion, err := helper.ConvertVersion(latest)
 	if err != nil {
 		return nil, err
 	}
@@ -99,53 +92,4 @@ func (o *OutDate) NewPatchVersionAvailable() bool {
 	return o.WantedVersion.Major == o.LatestVersion.Major &&
 		o.WantedVersion.Minor == o.LatestVersion.Minor &&
 		o.WantedVersion.Patch < o.LatestVersion.Patch
-}
-
-func ConvertVersion(version string) (*Version, error) {
-	//empty string -> means no version
-	if version == "" {
-		return &Version{
-			Major: 0,
-			Minor: 0,
-			Patch: 0,
-		}, nil
-	}
-
-	//remove all after a -, for example we have -rc2
-	version = strings.Split(version, "-")[0]
-
-	versionNumbers := strings.Split(version, ".")
-	if len(versionNumbers) == 0 {
-		return &Version{}, fmt.Errorf("invalid version syntax: %s", version)
-	}
-
-	if len(versionNumbers) > 3 {
-		return &Version{}, fmt.Errorf("invalid version syntax: %s", version)
-	}
-
-	major := 0
-	minor := 0
-	patch := 0
-
-	for i, v := range versionNumbers {
-		vInt, err := strconv.Atoi(v)
-		if err != nil {
-			return &Version{}, fmt.Errorf("invalid version syntax: %v", v)
-		}
-
-		switch i {
-		case 0:
-			major = vInt
-		case 1:
-			minor = vInt
-		case 2:
-			patch = vInt
-		}
-	}
-
-	return &Version{
-		Major: major,
-		Minor: minor,
-		Patch: patch,
-	}, nil
 }

@@ -179,7 +179,112 @@ func (client *Client) BuildJSThreadBlocks(analyser *code.JSAnalyser) error {
 	}
 
 	if len(analyser.OutDates) > 0 {
-		for _, outDate := range analyser.OutDates {
+		for i, outDate := range analyser.OutDates {
+			if i > maxLengthDepUpdates {
+				outDateBlock := map[string]any{
+					"type": "section",
+					"text": map[string]any{
+						"type": "mrkdwn",
+						"text": fmt.Sprintf("total of %d updates; have a look at the pipe", len(analyser.OutDates)),
+					},
+				}
+
+				client.Blocks = append(client.Blocks, outDateBlock)
+				break
+			}
+			//already mentioned
+			if outDate.Rating.StatusCode == npm.OutDateRatingNewMajorVersionAvailable {
+				continue
+			}
+
+			outDateBlock := map[string]any{
+				"type": "section",
+				"text": map[string]any{
+					"type": "mrkdwn",
+					"text": fmt.Sprintf("%s: %s", outDate.Name, outDate.Rating.Message),
+				},
+			}
+
+			client.Blocks = append(client.Blocks, outDateBlock)
+		}
+	}
+
+	if origin != "" {
+		//make sure we have https, not only http
+		if strings.HasPrefix(origin, "http://") {
+			origin = strings.Replace(origin, "http://", "https://", 1)
+		}
+
+		pipeLink := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf("[Pipe #%s](%s)", buildNumber, fmt.Sprintf("%s/pipelines/results/%s", origin, buildNumber)),
+			},
+		}
+		client.Blocks = append(client.Blocks, pipeLink)
+	}
+
+	return nil
+}
+
+func (client *Client) BuildPHPThreadBlocks(analyser *code.PHPAnalyser) error {
+	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
+	origin := os.Getenv("BITBUCKET_GIT_HTTP_ORIGIN")
+
+	if analyser.TestResult != "" {
+		testResultBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf("*Test result:*\n"),
+			},
+		}
+		client.Blocks = append(client.Blocks, testResultBlock)
+		client.Blocks = append(client.Blocks, getDividerBlock())
+
+		//split analyser.TestResult in text blocks not longer than 3000 characters
+		//slack has a limit of 3000 characters per text block
+
+		testResultMsg := analyser.TestResult
+		for len(testResultMsg) > 3000 {
+			testResultBlock = map[string]any{
+				"type": "section",
+				"text": map[string]any{
+					"type": "mrkdwn",
+					"text": testResultMsg[:3000],
+				},
+			}
+			client.Blocks = append(client.Blocks, testResultBlock)
+			testResultMsg = testResultMsg[3000:]
+		}
+
+		testResultBlock = map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": testResultMsg,
+			},
+		}
+
+		client.Blocks = append(client.Blocks, testResultBlock)
+	}
+
+	if len(analyser.OutDates) > 0 {
+		for i, outDate := range analyser.OutDates {
+			if i > maxLengthDepUpdates {
+				outDateBlock := map[string]any{
+					"type": "section",
+					"text": map[string]any{
+						"type": "mrkdwn",
+						"text": fmt.Sprintf("total of %d updates; have a look at the pipe", len(analyser.OutDates)),
+					},
+				}
+
+				client.Blocks = append(client.Blocks, outDateBlock)
+				break
+			}
+
 			//already mentioned
 			if outDate.Rating.StatusCode == npm.OutDateRatingNewMajorVersionAvailable {
 				continue
