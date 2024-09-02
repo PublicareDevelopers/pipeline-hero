@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/npm"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/php"
 	"sync"
 )
 
@@ -55,6 +56,7 @@ type PHPAnalyser struct {
 	Warnings         []string
 	HasWarnings      bool
 	TestResult       string
+	OutDates         []php.OutDate
 	lock             *sync.Mutex
 }
 

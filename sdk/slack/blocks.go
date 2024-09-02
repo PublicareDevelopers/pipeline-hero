@@ -179,7 +179,19 @@ func (client *Client) BuildJSThreadBlocks(analyser *code.JSAnalyser) error {
 	}
 
 	if len(analyser.OutDates) > 0 {
-		for _, outDate := range analyser.OutDates {
+		for i, outDate := range analyser.OutDates {
+			if i > maxLengthDepUpdates {
+				outDateBlock := map[string]any{
+					"type": "section",
+					"text": map[string]any{
+						"type": "mrkdwn",
+						"text": fmt.Sprintf("total of %d updates; have a look at the pipe", len(analyser.OutDates)),
+					},
+				}
+
+				client.Blocks = append(client.Blocks, outDateBlock)
+				break
+			}
 			//already mentioned
 			if outDate.Rating.StatusCode == npm.OutDateRatingNewMajorVersionAvailable {
 				continue
@@ -256,6 +268,38 @@ func (client *Client) BuildPHPThreadBlocks(analyser *code.PHPAnalyser) error {
 		}
 
 		client.Blocks = append(client.Blocks, testResultBlock)
+	}
+
+	if len(analyser.OutDates) > 0 {
+		for i, outDate := range analyser.OutDates {
+			if i > maxLengthDepUpdates {
+				outDateBlock := map[string]any{
+					"type": "section",
+					"text": map[string]any{
+						"type": "mrkdwn",
+						"text": fmt.Sprintf("total of %d updates; have a look at the pipe", len(analyser.OutDates)),
+					},
+				}
+
+				client.Blocks = append(client.Blocks, outDateBlock)
+				break
+			}
+
+			//already mentioned
+			if outDate.Rating.StatusCode == npm.OutDateRatingNewMajorVersionAvailable {
+				continue
+			}
+
+			outDateBlock := map[string]any{
+				"type": "section",
+				"text": map[string]any{
+					"type": "mrkdwn",
+					"text": fmt.Sprintf("%s: %s", outDate.Name, outDate.Rating.Message),
+				},
+			}
+
+			client.Blocks = append(client.Blocks, outDateBlock)
+		}
 	}
 
 	if origin != "" {

@@ -22,8 +22,14 @@ func ConvertVersion(version string) (*Version, error) {
 		}, nil
 	}
 
-	//remove all after a -, for example we have -rc2
-	version = strings.Split(version, "-")[0]
+	if strings.HasPrefix(version, "v") {
+		version = version[1:]
+	}
+
+	if strings.Contains(version, "-") {
+		//remove all after a -, for example we have -rc2
+		version = strings.Split(version, "-")[0]
+	}
 
 	versionNumbers := strings.Split(version, ".")
 	if len(versionNumbers) == 0 {

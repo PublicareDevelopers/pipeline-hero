@@ -1,6 +1,9 @@
 package code
 
-import "sync"
+import (
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/php"
+	"sync"
+)
 
 func NewPHPAnalyser() *PHPAnalyser {
 	return &PHPAnalyser{
@@ -11,6 +14,13 @@ func NewPHPAnalyser() *PHPAnalyser {
 func (a *PHPAnalyser) SetThreshold(threshold float64) *PHPAnalyser {
 	a.lock.Lock()
 	a.Threshold = threshold
+	a.lock.Unlock()
+	return a
+}
+
+func (a *PHPAnalyser) SetOutDates(outDates []php.OutDate) *PHPAnalyser {
+	a.lock.Lock()
+	a.OutDates = outDates
 	a.lock.Unlock()
 	return a
 }
