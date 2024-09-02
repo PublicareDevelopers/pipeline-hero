@@ -49,3 +49,26 @@ func sendVulnToPlatform(description string) (map[string]any, error) {
 	return platformClient.CreateSecurityTask()
 
 }
+
+func sendVulnToPlatformByLanguage(description string, language string) (map[string]any, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("recovered from panic: sendVulnToPlatform")
+		}
+	}()
+
+	repository := os.Getenv("BITBUCKET_REPO_FULL_NAME")
+	bitbucketProject := os.Getenv("BITBUCKET_PROJECT_KEY")
+
+	platformClient := platform.New()
+
+	platformClient.SetSecurityFixRequest(platform.SecurityFixRequest{
+		Repository:       repository,
+		BitbucketProject: bitbucketProject,
+		Description:      description,
+		Language:         language,
+	})
+
+	return platformClient.CreateSecurityTask()
+
+}
