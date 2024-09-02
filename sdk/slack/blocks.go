@@ -225,6 +225,18 @@ func (client *Client) BuildJSThreadBlocks(analyser *code.JSAnalyser) error {
 		client.Blocks = append(client.Blocks, pipeLink)
 	}
 
+	if len(client.Blocks) == 0 {
+		messageBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": "No errors found, no outDates found, nothing to worry about",
+			},
+		}
+
+		client.Blocks = append(client.Blocks, messageBlock)
+	}
+
 	return nil
 }
 
@@ -316,6 +328,18 @@ func (client *Client) BuildPHPThreadBlocks(analyser *code.PHPAnalyser) error {
 			},
 		}
 		client.Blocks = append(client.Blocks, pipeLink)
+	}
+
+	if len(client.Blocks) == 0 {
+		messageBlock := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": "No errors found, no outDates found, nothing to worry about",
+			},
+		}
+
+		client.Blocks = append(client.Blocks, messageBlock)
 	}
 
 	return nil
