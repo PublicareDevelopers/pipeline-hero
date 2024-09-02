@@ -10,6 +10,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"os"
+	"sync"
 )
 
 // pipePHPAnalyseCmd represents the pipePHPAnalyse command
@@ -29,24 +30,35 @@ var pipePHPAnalyseCmd = &cobra.Command{
 			fmt.Println("set env variable", key, "to", value)
 		}
 
-		analyser := code.NewAnalyser()
+		analyser := code.NewPHPAnalyser().SetThreshold(coverageThreshold)
 
-		color.Green("analysing composer.json\n")
+		var wg sync.WaitGroup
 
-		audit, err := cmds.GetComposerAudit()
-		if err != nil {
-			color.Red("%s\n\n", audit)
-			color.Red("%s\n", err)
-			analyser.PushError(audit)
-			slackNotifyError(analyser, "composer audit failed")
+		wg.Add(1)
+		go analysePHPVulnCheck(analyser, &wg)
+
+		wg.Wait()
+
+		if !useSlack {
+			if len(analyser.GetErrors()) > 0 {
+				color.Red("pipeline-hero failed")
+			}
+
+			if analyser.HasVulnCheckFail {
+				color.Red("Vuln Check failed")
+				color.Red(analyser.VulnCheck)
+			}
+
+			if analyser.HasWarnings {
+				color.Yellow("Warnings found\n")
+				for _, warning := range analyser.Warnings {
+					color.Yellow(warning)
+				}
+			}
 
 			os.Exit(255)
 			return
 		}
-
-		fmt.Printf("%s\n", audit)
-
-		slackNotifySuccess(analyser, "php")
 	},
 }
 
@@ -54,4 +66,22 @@ func init() {
 	pipeCmd.AddCommand(pipePHPAnalyseCmd)
 	pipePHPAnalyseCmd.Flags().BoolVarP(&useSlack, "slack", "s", false, "Send results to slack")
 	pipePHPAnalyseCmd.Flags().StringToStringVarP(&envVariables, "env", "e", map[string]string{}, "Environment variables to set")
+}
+
+func analysePHPVulnCheck(analyser *code.PHPAnalyser, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	audit, err := cmds.GetComposerAudit()
+	if err != nil {
+		analyser.SetVulnCheck(audit)
+		analyser.SetVulnCheckFail()
+
+		//analyser.PushError("audit failed")
+		//resp, err := sendVulnToPlatform(audit)
+		//if err != nil {
+		//	analyser.PushError("sending vuln to platform failed")
+		//}
+		//
+		//color.White(fmt.Sprintf("Vuln Check: %s\n", resp))
+	}
 }
