@@ -13,6 +13,9 @@ import (
 	"sync"
 )
 
+var testFolders []string
+var phpUnitCmd string
+
 // pipePHPAnalyseCmd represents the pipePHPAnalyse command
 var pipePHPAnalyseCmd = &cobra.Command{
 	Use:   "php-analyse",
@@ -37,11 +40,14 @@ var pipePHPAnalyseCmd = &cobra.Command{
 		wg.Add(1)
 		go analysePHPVulnCheck(analyser, &wg)
 
+		wg.Add(1)
+		go runPHPUnitTests(analyser, &wg)
+
 		wg.Wait()
 
 		if !useSlack {
 			if len(analyser.GetErrors()) > 0 {
-				color.Red("pipeline-hero failed")
+				color.Red("pipeline-hero failed, have %d errors", len(analyser.GetErrors()))
 			}
 
 			if analyser.HasVulnCheckFail {
@@ -66,6 +72,9 @@ func init() {
 	pipeCmd.AddCommand(pipePHPAnalyseCmd)
 	pipePHPAnalyseCmd.Flags().BoolVarP(&useSlack, "slack", "s", false, "Send results to slack")
 	pipePHPAnalyseCmd.Flags().StringToStringVarP(&envVariables, "env", "e", map[string]string{}, "Environment variables to set")
+	pipePHPAnalyseCmd.Flags().Float64VarP(&coverageThreshold, "coverage-threshold", "c", 75.0, "Coverage threshold to use")
+	pipePHPAnalyseCmd.Flags().StringSliceVarP(&testFolders, "test-folders", "t", []string{}, "Test folders to use")
+	pipePHPAnalyseCmd.Flags().StringVarP(&phpUnitCmd, "phpunit-cmd", "p", "./vendor/bin/phpunit", "PHPUnit command to use")
 }
 
 func analysePHPVulnCheck(analyser *code.PHPAnalyser, wg *sync.WaitGroup) {
@@ -83,5 +92,19 @@ func analysePHPVulnCheck(analyser *code.PHPAnalyser, wg *sync.WaitGroup) {
 		//}
 		//
 		//color.White(fmt.Sprintf("Vuln Check: %s\n", resp))
+	}
+}
+
+func runPHPUnitTests(analyser *code.PHPAnalyser, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	for _, folder := range testFolders {
+		out, err := cmds.RunPHPUnitTest(phpUnitCmd, folder)
+		if err != nil {
+			analyser.PushError(fmt.Sprintf("test failed at %s: %s\n", folder, out))
+			continue
+		}
+
+		color.Green("successfully tested: %s\n", folder)
 	}
 }
