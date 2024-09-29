@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/sast"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/slack"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -51,11 +53,19 @@ var pipeAnalyseCmd = &cobra.Command{
 		wg.Add(1)
 		go analyseVulnCheck(analyser, &wg)
 
+		wg.Add(1)
+		go analyseSASTCheck(analyser, &wg)
+
 		wg.Wait()
 
 		if !useSlack {
 			if len(analyser.GetErrors()) > 0 {
 				color.Red("pipeline-hero failed\n")
+
+				for _, err := range analyser.GetErrors() {
+					color.Red("%s\n", err)
+				}
+
 				os.Exit(255)
 			}
 			return
@@ -125,7 +135,7 @@ func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	color.Green("\nrunning tests\n")
-	out, err := exec.Command("go", "test", testSetup, fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
+	out, err := exec.Command("go", "test", testSetup, "-race", "-v", fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
 	if err != nil {
 		color.Red("Error: %s\n", err)
 		color.Red("Tests failed:\n%s\n", string(out))
@@ -200,4 +210,46 @@ func analyseVulnCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 
 	fmt.Println(vulCheck)
 	analyser.SetVulnCheck(vulCheck)
+}
+
+func analyseSASTCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	color.Green("starting SAST check\n")
+
+	sastStruct := sast.SAST{}
+	sastCheckJson, err := cmds.GoSAST()
+	if err != nil {
+		analyser.HasSASTCheckFail = true
+		color.Red("SAST check failed\n")
+		err = json.Unmarshal([]byte(err.Error()), &sastStruct)
+		if err != nil {
+			color.Red("Error: %s\n", err)
+			fmt.Println(sastCheckJson)
+			analyser.PushError(fmt.Sprintf("cannot parse the gosec.json: %s\n", err))
+		}
+
+		sastCheckString := fmt.Sprintf("Found %d SAST issues\n", sastStruct.Stats.Found)
+		for _, issue := range sastStruct.Issues {
+			sastCheckString += fmt.Sprintf("- %s (CWE %s) at %s line %s\n", issue.Details, issue.Cwe.ID, issue.File, issue.Line)
+		}
+
+		analyser.SetSASTCheck(sastCheckJson)
+		analyser.PushError(sastCheckString)
+
+		color.Red(sastCheckString)
+
+		//TODO need sendSASTtoPlatform
+		//resp, err := sendVulnToPlatform(err.Error())
+		//if err != nil {
+		//	color.Red("error sending vuln to platform: %s\n", err)
+		//	return
+		//}
+
+		//color.Green(fmt.Sprintf("vuln sent to platform: %+v\n", resp))
+
+		return
+	}
+
+	color.Green("SAST check passed\n")
 }

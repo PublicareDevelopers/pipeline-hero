@@ -1,0 +1,44 @@
+{
+	"Golang errors": {},
+	"Issues": [
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "foobar.go",
+			"code": "27: \n28: \tdata, _ := logsEvent.AWSLogs.Parse()\n29: \tfor _, logEvent := range data.LogEvents {\n",
+			"line": "28",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "not.go",
+			"code": "44: \tif resp.StatusCode != 200 {\n45: \t\tbody, _ := ioutil.ReadAll(resp.Body)\n46: \t\tlogger.Error(\"slack was not successful\", \"statusCode\", resp.StatusCode, \"body\", body)\n",
+			"line": "45",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		}
+	],
+	"Stats": {
+		"files": 19,
+		"lines": 892,
+		"nosec": 2,
+		"found": 2
+	},
+	"GosecVersion": "dev"
+}

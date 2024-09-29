@@ -20,7 +20,9 @@ type Analyser struct {
 	DependencyGraph  string
 	Updates          []RequireUpdate
 	VulnCheck        string
+	SASTCheck        string
 	HasVuln          bool
+	HasSASTCheckFail bool
 	HasErrors        bool
 	Errors           []string
 	Warnings         []string
@@ -155,6 +157,13 @@ func (a *Analyser) SetDependencyGraph(dependencyGraph string) *Analyser {
 func (a *Analyser) SetVulnCheck(vulnCheck string) *Analyser {
 	a.lock.Lock()
 	a.VulnCheck = vulnCheck
+	a.lock.Unlock()
+	return a
+}
+
+func (a *Analyser) SetSASTCheck(sastCheck string) *Analyser {
+	a.lock.Lock()
+	a.SASTCheck = sastCheck
 	a.lock.Unlock()
 	return a
 }
