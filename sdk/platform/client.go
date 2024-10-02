@@ -23,6 +23,10 @@ func (c *Client) SetSecurityFixRequest(request SecurityFixRequest) {
 	c.securityFixRequest = request
 }
 
+func (c *Client) SetSASTFixRequest(request SASTFixRequest) {
+	c.sastFixRequest = request
+}
+
 func (c *Client) Do() (Response, error) {
 	resp := Response{}
 
@@ -72,6 +76,43 @@ func (c *Client) CreateSecurityTask() (map[string]any, error) {
 
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", c.origin+"security-fix", bytes.NewReader(payload))
+	if err != nil {
+		fmt.Printf("Error creating request: %s", err)
+		return resp, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", c.token)
+
+	response, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("Error sending request: %s", err)
+		return resp, err
+	}
+
+	if response.StatusCode >= 300 {
+		return resp, fmt.Errorf("error status: %s", response.Status)
+	}
+
+	defer response.Body.Close()
+
+	err = json.NewDecoder(response.Body).Decode(&resp)
+
+	return resp, err
+}
+
+func (c *Client) CreateSASTTask() (map[string]any, error) {
+	resp := map[string]any{}
+
+	payload, err := json.Marshal(c.sastFixRequest)
+	if err != nil {
+		return resp, err
+	}
+
+	fmt.Println("pushing data to platform")
+
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", c.origin+"sast-fix", bytes.NewReader(payload))
 	if err != nil {
 		fmt.Printf("Error creating request: %s", err)
 		return resp, err

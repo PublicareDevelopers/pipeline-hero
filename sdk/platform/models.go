@@ -5,9 +5,17 @@ type Client struct {
 	token              string
 	request            Request
 	securityFixRequest SecurityFixRequest
+	sastFixRequest     SASTFixRequest
 }
 
 type SecurityFixRequest struct {
+	Description      string `json:"description"`
+	BitbucketProject string `json:"bitbucketProject"`
+	Repository       string `json:"repository"`
+	Language         string `json:"language"`
+}
+
+type SASTFixRequest struct {
 	Description      string `json:"description"`
 	BitbucketProject string `json:"bitbucketProject"`
 	Repository       string `json:"repository"`
