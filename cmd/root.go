@@ -28,6 +28,28 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
+func sendSastToPlatform(description string) (map[string]any, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("recovered from panic: sendSastToPlatform")
+		}
+	}()
+
+	repository := os.Getenv("BITBUCKET_REPO_FULL_NAME")
+	bitbucketProject := os.Getenv("BITBUCKET_PROJECT_KEY")
+
+	platformClient := platform.New()
+
+	platformClient.SetSASTFixRequest(platform.SASTFixRequest{
+		Repository:       repository,
+		BitbucketProject: bitbucketProject,
+		Description:      description,
+	})
+
+	return platformClient.CreateSASTTask()
+
+}
+
 func sendVulnToPlatform(description string) (map[string]any, error) {
 	defer func() {
 		if r := recover(); r != nil {

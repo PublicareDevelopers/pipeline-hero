@@ -220,12 +220,14 @@ func analyseSASTCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 	sastStruct := sast.SAST{}
 	sastCheckJson, err := cmds.GoSAST()
 	if err != nil {
+		errString := err.Error()
 		analyser.HasSASTCheckFail = true
 		color.Red("SAST check failed\n")
-		err = json.Unmarshal([]byte(err.Error()), &sastStruct)
+
+		err = json.Unmarshal([]byte(errString), &sastStruct)
 		if err != nil {
 			color.Red("Error: %s\n", err)
-			fmt.Println(sastCheckJson)
+
 			analyser.PushError(fmt.Sprintf("cannot parse the gosec.json: %s\n", err))
 		}
 
@@ -239,14 +241,13 @@ func analyseSASTCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 
 		color.Red(sastCheckString)
 
-		//TODO need sendSASTtoPlatform
-		//resp, err := sendVulnToPlatform(err.Error())
-		//if err != nil {
-		//	color.Red("error sending vuln to platform: %s\n", err)
-		//	return
-		//}
+		resp, err := sendSastToPlatform(errString)
+		if err != nil {
+			color.Red("error sending SAST to platform: %s\n", err)
+			return
+		}
 
-		//color.Green(fmt.Sprintf("vuln sent to platform: %+v\n", resp))
+		color.Green(fmt.Sprintf("vuln sent to platform: %+v\n", resp))
 
 		return
 	}
