@@ -233,7 +233,7 @@ func analyseSASTCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 
 		sastCheckString := fmt.Sprintf("Found %d SAST issues\n", sastStruct.Stats.Found)
 		for _, issue := range sastStruct.Issues {
-			sastCheckString += fmt.Sprintf("- %s (CWE %s) at %s line %s\n", issue.Details, issue.Cwe.ID, issue.File, issue.Line)
+			sastCheckString += fmt.Sprintf("- %s (CWE %s) at %s line %s\n Confidence: %s; Severity: %s; \n\n", issue.Details, issue.Cwe.ID, issue.File, issue.Line, issue.Confidence, issue.Severity)
 		}
 
 		analyser.SetSASTCheck(sastCheckJson)
