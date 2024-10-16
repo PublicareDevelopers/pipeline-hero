@@ -38,6 +38,8 @@ func GetComposerAudit() (string, error) {
 			if exitError.ExitCode() == 6 {
 				return parseComposerAudit(string(out)), nil
 			}
+
+			fmt.Println(exitError.ExitCode(), "code caused npm audit fail")
 		}
 
 		return parseComposerAudit(string(out)), err
