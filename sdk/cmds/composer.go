@@ -34,8 +34,8 @@ func GetComposerAudit() (string, error) {
 	out, err := exec.Command("composer", "audit", "-f", "json").Output()
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
-			//this is cause 6 means Abandoned only
-			if exitError.ExitCode() == 6 {
+			//this is cause 6 means Abandoned only and at bitbucket 7 also
+			if exitError.ExitCode() == 6 || exitError.ExitCode() == 7 {
 				return parseComposerAudit(string(out)), nil
 			}
 
