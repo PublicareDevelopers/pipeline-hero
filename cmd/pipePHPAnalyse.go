@@ -53,13 +53,16 @@ var pipePHPAnalyseCmd = &cobra.Command{
 		wg.Wait()
 
 		if !useSlack {
+			exitCode := 0
 			if len(analyser.GetErrors()) > 0 {
 				color.Red("pipeline-hero failed, have %d errors", len(analyser.GetErrors()))
+				exitCode = 255
 			}
 
 			if analyser.HasVulnCheckFail {
 				color.Red("Vuln Check failed")
 				color.Red(analyser.VulnCheck)
+				exitCode = 255
 			}
 
 			if analyser.HasWarnings {
@@ -69,7 +72,7 @@ var pipePHPAnalyseCmd = &cobra.Command{
 				}
 			}
 
-			os.Exit(255)
+			os.Exit(exitCode)
 			return
 		}
 
