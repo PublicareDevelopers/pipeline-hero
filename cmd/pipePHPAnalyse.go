@@ -112,7 +112,9 @@ func analysePHPVulnCheck(analyser *code.PHPAnalyser, wg *sync.WaitGroup) {
 		analyser.SetVulnCheck(audit)
 		analyser.SetVulnCheckFail()
 
-		analyser.PushError("audit failed")
+		analyser.PushError(fmt.Sprintf("audit failed: %s", err))
+		color.Red("audit err %s: %s", err, audit)
+
 		resp, err := sendVulnToPlatformByLanguage(audit, "php")
 		if err != nil {
 			analyser.PushError("sending vuln to platform failed")
