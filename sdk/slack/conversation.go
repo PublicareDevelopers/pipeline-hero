@@ -134,7 +134,7 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 	projectName := os.Getenv("BITBUCKET_PROJECT_KEY")
 
 	platformClient.SetRequest(platform.Request{
-		Language: "js",
+		Language: "go",
 		RunAt:    time.Now().UTC().String(),
 		Build:    build,
 		Analyser: analyserMap,
@@ -283,7 +283,7 @@ func (client *Client) StartJSConversation(analyser *code.JSAnalyser) error {
 	projectName := os.Getenv("BITBUCKET_PROJECT_KEY")
 
 	platformClient.SetRequest(platform.Request{
-		Language: "go",
+		Language: "js",
 		RunAt:    time.Now().UTC().String(),
 		Build:    build,
 		Analyser: analyserMap,
