@@ -107,22 +107,7 @@ func CodeReviewByVet(codePart string) (string, error) {
 	return string(out), nil
 }
 
-func CodeReviewByGoSec(codePart string) (string, error) {
-	_, err := exec.Command("go", "install", "github.com/securego/gosec/v2/cmd/gosec@latest").Output()
-	if err != nil {
-		return "", err
-	}
-
-	out, err := exec.Command("gosec", "-fmt", "txt", codePart).Output()
-	if err != nil {
-		return fmt.Sprintf("%s", string(out)), nil
-	}
-
-	return string(out), nil
-}
-
 // CodeReviewByNilCheck runs nilaway on the given code part
-// TODO - this is not working as expected, we have no output from nilaway
 func CodeReviewByNilCheck(codePart string) (string, error) {
 	_, err := exec.Command("go", "install", "go.uber.org/nilaway/cmd/nilaway@latest").Output()
 	if err != nil {
@@ -134,6 +119,24 @@ func CodeReviewByNilCheck(codePart string) (string, error) {
 
 	if err != nil {
 		return string(out), nil
+	}
+
+	return string(out), nil
+}
+
+func CodeReviewVueMess(level string) (string, error) {
+	_, err := exec.Command("npm", "install", "vue-mess-detector", "--save-dev").Output()
+	if err != nil {
+		return "", err
+	}
+
+	//npx vue-mess-detector analyze
+	out, err := exec.Command("npx", "vue-mess-detector", "analyse",
+		"--group=file", fmt.Sprintf("--level=%s", level),
+		"--health-error=75",
+	).Output()
+	if err != nil {
+		return fmt.Sprintf("%s", string(out)), nil
 	}
 
 	return string(out), nil
