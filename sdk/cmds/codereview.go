@@ -51,8 +51,6 @@ func CodeReview(codePart string) (string, error) {
 					continue
 				}
 
-				fmt.Println(results)
-
 				for _, result := range results {
 					nilaway, ok := result.(map[string]any)
 					if !ok {
