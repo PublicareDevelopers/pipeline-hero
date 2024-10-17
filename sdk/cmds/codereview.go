@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"encoding/json"
 	"fmt"
 	"os/exec"
 )
@@ -25,22 +26,58 @@ func CodeReview(codePart string) (string, error) {
 		codeReview += res
 	}
 
-	res, err = CodeReviewByGoSec(codePart)
+	// TODO - this is not working as expected, we have no output from nilaway
+	res, err = CodeReviewByNilCheck(codePart)
 	if err != nil {
 		errors = append(errors, err)
 	} else {
 		codeReview += "\n"
-		codeReview += res
-	}
+		type NilCheck map[string]any
+		var nilCheck NilCheck
 
-	// TODO - this is not working as expected, we have no output from nilaway
-	//res, err = CodeReviewByNilCheck(codePart)
-	//if err != nil {
-	//	errors = append(errors, err)
-	//} else {
-	//	codeReview += "\n"
-	//	codeReview += res
-	//}
+		err = json.Unmarshal([]byte(res), &nilCheck)
+		if err != nil {
+			errors = append(errors, err)
+		}
+
+		for _, check := range nilCheck {
+			for k, v := range check.(map[string]any) {
+				if k == "false" {
+					continue
+				}
+
+				results, ok := (v.([]interface{}))
+				if !ok {
+					continue
+				}
+
+				fmt.Println(results)
+
+				for _, result := range results {
+					nilaway, ok := result.(map[string]any)
+					if !ok {
+						continue
+					}
+
+					pos, ok := nilaway["posn"].(string)
+					if !ok {
+						continue
+					}
+
+					message, ok := nilaway["message"].(string)
+					if !ok {
+						continue
+					}
+
+					codeReview += fmt.Sprintf("at %s:\n %s\n\n", pos, message)
+				}
+
+			}
+
+		}
+
+		//codeReview += res
+	}
 
 	if len(errors) > 0 {
 		return codeReview, fmt.Errorf("errors: %v", errors)
@@ -94,10 +131,11 @@ func CodeReviewByNilCheck(codePart string) (string, error) {
 		return "", err
 	}
 
-	out, err := exec.Command("nilaway", codePart).Output()
+	//-json -pretty-print=false
+	out, err := exec.Command("nilaway", "-json", "-pretty-print", "false", codePart).Output()
 
 	if err != nil {
-		return fmt.Sprintf("%s", string(out)), nil
+		return string(out), nil
 	}
 
 	return string(out), nil
