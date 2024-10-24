@@ -135,7 +135,7 @@ func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	color.Green("\nrunning tests\n")
-	out, err := exec.Command("go", "test", testSetup, "-race", fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
+	out, err := exec.Command("go", "test", testSetup, fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
 	if err != nil {
 		color.Red("Error: %s\n", err)
 		color.Red("Tests failed:\n%s\n", string(out))
