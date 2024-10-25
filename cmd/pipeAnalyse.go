@@ -30,7 +30,7 @@ var pipeAnalyseCmd = &cobra.Command{
 		for key, value := range envVariables {
 			err := os.Setenv(key, value)
 			if err != nil {
-				color.Red("Error: %s\n", err)
+				color.Red("Error setting env vars: %s\n", err)
 				os.Exit(255)
 			}
 
@@ -79,7 +79,7 @@ var pipeAnalyseCmd = &cobra.Command{
 
 		err = client.StartConversation(analyser, "go")
 		if err != nil {
-			color.Red("Error: %s\n", err)
+			color.Red("error starting slack conversation: %s\n", err)
 			os.Exit(255)
 		}
 
@@ -103,7 +103,7 @@ func analyseVersion(analyser *code.Analyser, wg *sync.WaitGroup) {
 
 	version, err := cmds.GetVersion()
 	if err != nil {
-		color.Red("Error: %s\n", err)
+		color.Red("error getting go version: %s\n", err)
 		analyser.PushError(fmt.Sprintf("cannot find the go version: %s\n", err))
 		return
 	}
@@ -122,7 +122,7 @@ func analyseSDependencyGraph(analyser *code.Analyser, wg *sync.WaitGroup) {
 	dependencyGraph, err := cmds.GetDependencyGraph()
 	if err != nil {
 		analyser.PushWarning(fmt.Sprintf("internal pipeline-hero error: cannot find the dependency graph: %s\n", err))
-		color.Red("Error: %s\n", err)
+		color.Red("error getting dependency graph: %s\n", err)
 		return
 	}
 
@@ -137,7 +137,7 @@ func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {
 	color.Green("\nrunning tests\n")
 	out, err := exec.Command("go", "test", testSetup, "-v", fmt.Sprintf("-coverpkg=%s", testSetup), "-coverprofile=cover.cov").Output()
 	if err != nil {
-		color.Red("Error: %s\n", err)
+		color.Red("error running tests: %s\n", err)
 		color.Red("Tests failed:\n%s\n", string(out))
 
 		//regex find`FAIL(.*)`gm
@@ -165,7 +165,7 @@ func analyseTestCoverage(analyser *code.Analyser, wg *sync.WaitGroup) {
 	out, err = exec.Command("go", "tool", "cover", "-func=cover.cov").Output()
 	if err != nil {
 		fmt.Printf("%s\n", string(out))
-		color.Red("Error: %s\n", err)
+		color.Red("error getting coverage: %s\n", err)
 		analyser.PushError(fmt.Sprintf("Coverage failed:\n%s\n", string(out)))
 		return
 	}
@@ -194,7 +194,7 @@ func analyseVulnCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 	var vulCheck string
 	vulCheck, err := cmds.VulnCheck(testSetup)
 	if err != nil {
-		color.Red("%s\n", err)
+		color.Red("vuln check error:\n%s\n", err)
 		analyser.HasVuln = true
 		analyser.PushError(err.Error())
 		resp, err := sendVulnToPlatform(err.Error())
@@ -226,7 +226,7 @@ func analyseSASTCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 
 		err = json.Unmarshal([]byte(errString), &sastStruct)
 		if err != nil {
-			color.Red("Error: %s\n", err)
+			color.Red("error unmarshalling SAST: %s\n", err)
 
 			analyser.PushError(fmt.Sprintf("cannot parse the gosec.json: %s\n", err))
 		}
@@ -247,7 +247,7 @@ func analyseSASTCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 			return
 		}
 
-		color.Green(fmt.Sprintf("vuln sent to platform: %+v\n", resp))
+		color.Green(fmt.Sprintf("SAST sent to platform: %+v\n", resp))
 
 		return
 	}

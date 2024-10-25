@@ -99,3 +99,15 @@ func TestAnalyser_GetDependencyGraph(t *testing.T) {
 		t.Errorf("GetUpdatableDependencies() = %v, want %v", len(deps), 1)
 	}
 }
+
+func TestAnalyser_GetDependenciesForPlatform(t *testing.T) {
+	a := NewAnalyser()
+	deps := a.GetDependenciesForPlatform("test")
+	if deps == nil {
+		t.Fatalf("GetDependenciesForPlatform() = %v, want > %v", deps, nil)
+	}
+
+	if len(deps) == 0 {
+		t.Fatalf("GetDependenciesForPlatform() = %v, want > %v", len(deps), 0)
+	}
+}
