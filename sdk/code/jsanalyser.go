@@ -79,6 +79,10 @@ func (a *JSAnalyser) SetOutDates(outDates []npm.OutDate) *JSAnalyser {
 
 func (a *JSAnalyser) PushWarning(warning string) *JSAnalyser {
 	a.lock.Lock()
+	if a.Warnings == nil {
+		a.Warnings = []string{}
+	}
+
 	a.Warnings = append(a.Warnings, warning)
 	a.HasWarnings = true
 	a.lock.Unlock()

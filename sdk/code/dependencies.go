@@ -70,8 +70,7 @@ func (a *Analyser) GetDependenciesForPlatform(repository string) []platform.Depe
 func (a *JSAnalyser) GetDependenciesForPlatform(repository string) []platform.Dependency {
 	out, err := cmds.AnalyseNPMModule()
 	if err != nil {
-		a.PushWarning(fmt.Sprintf("internal pipeline-hero error: cannot find the module: %s\n", err))
-		return nil
+		fmt.Println("having npm list error", err)
 	}
 
 	mod := npm.Mod{}
