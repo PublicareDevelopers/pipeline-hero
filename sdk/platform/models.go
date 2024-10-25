@@ -1,11 +1,12 @@
 package platform
 
 type Client struct {
-	origin             string
-	token              string
-	request            Request
-	securityFixRequest SecurityFixRequest
-	sastFixRequest     SASTFixRequest
+	origin              string
+	token               string
+	request             Request
+	securityFixRequest  SecurityFixRequest
+	sastFixRequest      SASTFixRequest
+	dependenciesRequest DependenciesRequest
 }
 
 type SecurityFixRequest struct {
@@ -20,6 +21,17 @@ type SASTFixRequest struct {
 	BitbucketProject string `json:"bitbucketProject"`
 	Repository       string `json:"repository"`
 	Language         string `json:"language"`
+}
+
+type DependenciesRequest struct {
+	Dependencies []Dependency `json:"dependencies"`
+}
+
+type Dependency struct {
+	Repository string `json:"repository"`
+	Name       string `json:"name"`
+	Version    string `json:"version"`
+	Language   string `json:"language"`
 }
 
 type Request struct {

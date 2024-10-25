@@ -28,7 +28,7 @@ type Analyser struct {
 	Warnings         []string
 	TestResult       string
 	Profiles         []Profile
-	dependencies     []Dependency //Deprecated: use Updates instead
+	dependencies     []Dependency //deprecated
 	lock             *sync.Mutex
 }
 

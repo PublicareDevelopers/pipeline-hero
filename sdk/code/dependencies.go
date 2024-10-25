@@ -1,8 +1,10 @@
 package code
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/platform"
 	"github.com/fatih/color"
 	"strings"
 )
@@ -37,6 +39,33 @@ func (a *Analyser) SetUpdatableRequirements() {
 	a.lock.Unlock()
 }
 
+func (a *Analyser) GetDependenciesForPlatform(repository string) []platform.Dependency {
+	out, err := cmds.AnalyseModule()
+	if err != nil {
+		a.PushWarning(fmt.Sprintf("internal pipeline-hero error: cannot find the module: %s\n", err))
+		return nil
+	}
+
+	mod := GoMod{}
+	err = json.Unmarshal([]byte(out), &mod)
+	if err != nil {
+		a.PushWarning(fmt.Sprintf("internal pipeline-hero error: cannot parse the module: %s\n", err))
+		return nil
+	}
+
+	dependencies := make([]platform.Dependency, 0)
+	for _, require := range mod.Require {
+		dependencies = append(dependencies, platform.Dependency{
+			Repository: repository,
+			Name:       require.Path,
+			Version:    require.Version,
+			Language:   "go",
+		})
+	}
+
+	return dependencies
+}
+
 // GetUpdatableDependencies
 // Deprecated: we now use the list of Requirements from the go.mod file: use here SetUpdatableDependencies
 func (a *Analyser) GetUpdatableDependencies() []Dependency {
@@ -55,7 +84,7 @@ func (a *Analyser) GetDependencyGraph() []Dependency {
 }
 
 // parseDependencyGraph
-// Deprecated: we now use the list of Requirements from the go.mod file
+// Deprecated: we now use the list of Requirements from the go.mod file: use here SetUpdatableDependencies
 func (a *Analyser) parseDependencyGraph() {
 	for count, line := range strings.Split(a.DependencyGraph, "\n") {
 		if len(line) == 0 {
@@ -88,8 +117,6 @@ func (a *Analyser) parseDependencyGraph() {
 		a.lock.Unlock()
 	}
 
-	/*if len(a.dependencies) > maxDependencyChecks {
-		a.PushWarning(
-			fmt.Sprintf("Only the first %d dependencies are checked for updates. Have a total of %d", maxDependencyChecks, len(a.dependencies)))
-	}*/
+	//push them to the platform
+	//platformClient := platform.New()
 }

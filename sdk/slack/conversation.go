@@ -151,6 +151,17 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 		color.Red("error at platform handling: %s\n", err)
 	}
 
+	dependencies := analyser.GetDependenciesForPlatform(repoFullName)
+	if len(dependencies) > 0 {
+		req := platform.DependenciesRequest{Dependencies: dependencies}
+		platformClient.SetDependenciesRequest(req)
+
+		_, err = platformClient.SendDependencies()
+		if err != nil {
+			color.Red("error at platform dependencies handling: %s\n", err)
+		}
+	}
+
 	return nil
 }
 
