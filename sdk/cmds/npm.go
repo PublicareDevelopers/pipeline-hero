@@ -33,7 +33,7 @@ func GetNPMOutdated() (string, error) {
 func AnalyseNPMModule() (string, error) {
 	out, err := exec.Command("npm", "list", "--json").Output()
 	if err != nil {
-		return "", err
+		return string(out), err
 	}
 
 	return string(out), nil
