@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/cmds"
+	"github.com/PublicareDevelopers/pipeline-hero/sdk/npm"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/platform"
 	"github.com/fatih/color"
 	"strings"
@@ -60,6 +61,33 @@ func (a *Analyser) GetDependenciesForPlatform(repository string) []platform.Depe
 			Name:       require.Path,
 			Version:    require.Version,
 			Language:   "go",
+		})
+	}
+
+	return dependencies
+}
+
+func (a *JSAnalyser) GetDependenciesForPlatform(repository string) []platform.Dependency {
+	out, err := cmds.AnalyseNPMModule()
+	if err != nil {
+		a.PushWarning(fmt.Sprintf("internal pipeline-hero error: cannot find the module: %s\n", err))
+		return nil
+	}
+
+	mod := npm.Mod{}
+	err = json.Unmarshal([]byte(out), &mod)
+	if err != nil {
+		a.PushWarning(fmt.Sprintf("internal pipeline-hero error: cannot parse the module: %s\n", err))
+		return nil
+	}
+
+	dependencies := make([]platform.Dependency, 0)
+	for name, dep := range mod.Dependencies {
+		dependencies = append(dependencies, platform.Dependency{
+			Repository: repository,
+			Name:       name,
+			Version:    dep.Version,
+			Language:   "js",
 		})
 	}
 
