@@ -31,6 +31,5 @@ var codereviewGoCmd = &cobra.Command{
 func init() {
 	codereviewCmd.AddCommand(codereviewGoCmd)
 
-	codereviewGoCmd.Flags().StringVarP(&codePath, "path", "p", "", "path to the go code")
-	_ = codereviewGoCmd.MarkFlagRequired("path")
+	codereviewGoCmd.Flags().StringVarP(&codePath, "path", "p", "./...", "path to the go code")
 }

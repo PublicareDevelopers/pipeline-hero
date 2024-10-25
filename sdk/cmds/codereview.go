@@ -141,3 +141,17 @@ func CodeReviewVueMess(level string) (string, error) {
 
 	return string(out), nil
 }
+
+func CodeReviewPHPStan(path string, level string) (string, error) {
+	_, err := exec.Command("composer", "require", "phpstan/phpstan", "--dev").Output()
+	if err != nil {
+		return "", err
+	}
+
+	out, err := exec.Command("vendor/bin/phpstan", "analyse", path, fmt.Sprintf("--level=%s", level)).Output()
+	if err != nil {
+		return fmt.Sprintf("%s", string(out)), nil
+	}
+
+	return string(out), nil
+}
