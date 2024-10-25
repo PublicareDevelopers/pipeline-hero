@@ -80,12 +80,55 @@ func (a *JSAnalyser) GetDependenciesForPlatform(repository string) []platform.De
 		return nil
 	}
 
+	missingProblems := map[string]string{}
+	for _, problem := range mod.Problems {
+		parts := strings.Split(problem, ", required by")
+		if len(parts) != 2 {
+			fmt.Println("problem", problem)
+			continue
+		}
+
+		missingParts := strings.Split(parts[0], "missing: ")
+		if len(missingParts) != 2 {
+			fmt.Println("missingParts", missingParts)
+			continue
+		}
+
+		var packageParts []string
+		packageStr := strings.Trim(missingParts[1], " ")
+		if strings.HasPrefix(packageStr, "@") {
+			packageParts = strings.Split(packageStr[1:], "@")
+			missingProblems["@"+packageParts[0]] = packageParts[1]
+			continue
+		}
+
+		packageParts = strings.Split(packageStr, "@")
+		missingProblems[packageParts[0]] = packageParts[1]
+	}
+
 	dependencies := make([]platform.Dependency, 0)
 	for name, dep := range mod.Dependencies {
+		version := dep.Version
+		if version == "" {
+			version = dep.Required
+		}
+
+		if version == "" {
+			if v, ok := missingProblems[name]; ok {
+				version = v
+			} else {
+				fmt.Println("missing version for", name)
+			}
+		}
+
+		if version == "" {
+			version = "unknown"
+		}
+
 		dependencies = append(dependencies, platform.Dependency{
 			Repository: repository,
 			Name:       name,
-			Version:    dep.Version,
+			Version:    version,
 			Language:   "js",
 		})
 	}
