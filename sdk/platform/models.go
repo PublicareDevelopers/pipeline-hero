@@ -28,10 +28,11 @@ type DependenciesRequest struct {
 }
 
 type Dependency struct {
-	Repository string `json:"repository"`
-	Name       string `json:"name"`
-	Version    string `json:"version"`
-	Language   string `json:"language"`
+	Repository string         `json:"repository"`
+	Name       string         `json:"name"`
+	Version    string         `json:"version"`
+	Language   string         `json:"language"`
+	Data       map[string]any `json:"data"`
 }
 
 type Request struct {

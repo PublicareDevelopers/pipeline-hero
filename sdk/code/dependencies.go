@@ -8,6 +8,7 @@ import (
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/platform"
 	"github.com/fatih/color"
 	"strings"
+	"sync"
 )
 
 var maxDependencyChecks = 100
@@ -84,13 +85,11 @@ func (a *JSAnalyser) GetDependenciesForPlatform(repository string) []platform.De
 	for _, problem := range mod.Problems {
 		parts := strings.Split(problem, ", required by")
 		if len(parts) != 2 {
-			fmt.Println("problem", problem)
 			continue
 		}
 
 		missingParts := strings.Split(parts[0], "missing: ")
 		if len(missingParts) != 2 {
-			fmt.Println("missingParts", missingParts)
 			continue
 		}
 
@@ -116,8 +115,6 @@ func (a *JSAnalyser) GetDependenciesForPlatform(repository string) []platform.De
 		if version == "" {
 			if v, ok := missingProblems[name]; ok {
 				version = v
-			} else {
-				fmt.Println("missing version for", name)
 			}
 		}
 
@@ -125,11 +122,70 @@ func (a *JSAnalyser) GetDependenciesForPlatform(repository string) []platform.De
 			version = "unknown"
 		}
 
+		type ConcurrentLoader struct {
+			Data map[string]any `json:"data"`
+			lock sync.Mutex
+		}
+
+		data := ConcurrentLoader{
+			Data: map[string]any{},
+			lock: sync.Mutex{},
+		}
+
+		var wg sync.WaitGroup
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			data.lock.Lock()
+			repoUrl, err := cmds.GetNPMPackageRepoURL(name)
+			if err == nil {
+				data.Data["repository"] = repoUrl
+			}
+			data.lock.Unlock()
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			data.lock.Lock()
+			contributors, err := cmds.GetNPMPackageContributors(name)
+			if err == nil {
+				data.Data["contributors"] = contributors
+			}
+			data.lock.Unlock()
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			data.lock.Lock()
+			licence, err := cmds.GetNPMPackageLicense(name)
+			if err == nil {
+				data.Data["licence"] = licence
+			}
+			data.lock.Unlock()
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			data.lock.Lock()
+			author, err := cmds.GetNPMAuthor(name)
+			if err == nil {
+				data.Data["author"] = author
+			}
+			data.lock.Unlock()
+		}()
+
+		wg.Wait()
+
 		dependencies = append(dependencies, platform.Dependency{
 			Repository: repository,
 			Name:       name,
 			Version:    version,
 			Language:   "js",
+			Data:       data.Data,
 		})
 	}
 

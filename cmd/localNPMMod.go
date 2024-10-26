@@ -4,6 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"github.com/PublicareDevelopers/pipeline-hero/sdk/code"
 
 	"github.com/spf13/cobra"
@@ -18,7 +19,7 @@ var localNPMModCmd = &cobra.Command{
 		a := code.JSAnalyser{}
 		deps := a.GetDependenciesForPlatform("repository")
 		for _, dep := range deps {
-			cmd.Println(dep)
+			fmt.Printf("%+v\n", dep)
 		}
 	},
 }
