@@ -241,7 +241,7 @@ func analyseSASTCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 
 		color.Red(sastCheckString)
 
-		resp, err := sendSastToPlatform(errString)
+		resp, err := sendSastToPlatform(sastCheckString)
 		if err != nil {
 			color.Red("error sending SAST to platform: %s\n", err)
 			return
