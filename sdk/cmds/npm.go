@@ -3,6 +3,7 @@ package cmds
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 func GetNPMAudit() (string, error) {
@@ -47,7 +48,7 @@ func GetNPMPackageRepoURL(packageName string) (string, error) {
 		return string(out), err
 	}
 
-	return string(out), nil
+	return strings.TrimSuffix(string(out), "\n"), nil
 }
 
 func GetNPMPackageContributors(packageName string) (string, error) {
@@ -57,7 +58,7 @@ func GetNPMPackageContributors(packageName string) (string, error) {
 		return string(out), err
 	}
 
-	return string(out), nil
+	return strings.TrimSuffix(string(out), "\n"), nil
 }
 
 func GetNPMAuthor(packageName string) (string, error) {
@@ -67,7 +68,7 @@ func GetNPMAuthor(packageName string) (string, error) {
 		return string(out), err
 	}
 
-	return string(out), nil
+	return strings.TrimSuffix(string(out), "\n"), nil
 }
 
 func GetNPMPackageLicense(packageName string) (string, error) {
@@ -77,5 +78,5 @@ func GetNPMPackageLicense(packageName string) (string, error) {
 		return string(out), err
 	}
 
-	return string(out), nil
+	return strings.TrimSuffix(string(out), "\n"), nil
 }
