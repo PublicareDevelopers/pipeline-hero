@@ -9,7 +9,7 @@ import (
 func RunPHPUnitTest(phpunitCmd string, folder string) (string, error) {
 	out, err := exec.Command(phpunitCmd, folder).Output()
 	if err != nil {
-		fmt.Printf("error: %s\n", err)
+		fmt.Printf("error: %s\n%s", err, string(out))
 		return string(out), err
 	}
 
@@ -66,8 +66,8 @@ func parseComposerAudit(audit string) string {
 func parseJsonAudit(audit string) string {
 	var msg string
 	type Audit struct {
-		Advisories any            `json:"advisories"` //can be [] or (map[string][]map[string]any
-		Abandoned  map[string]any `json:"abandoned"`
+		Advisories any `json:"advisories"` //can be [] or (map[string][]map[string]any
+		Abandoned  any `json:"abandoned"`
 	}
 
 	var parsed Audit
@@ -112,7 +112,17 @@ func parseJsonAudit(audit string) string {
 
 	msg += "\n Abandoned \n"
 
-	for key, replace := range parsed.Abandoned {
+	_, arrOk := parsed.Advisories.([]any)
+	if arrOk {
+		return msg
+	}
+
+	parsedAbb, ok := parsed.Abandoned.(map[string]any)
+	if !ok {
+		return msg
+	}
+
+	for key, replace := range parsedAbb {
 		msg += fmt.Sprintf("%s: %+v\n", key, replace)
 	}
 
