@@ -112,7 +112,7 @@ func parseJsonAudit(audit string) string {
 
 	msg += "\n Abandoned \n"
 
-	_, arrOk := parsed.Advisories.([]any)
+	_, arrOk := parsed.Abandoned.([]any)
 	if arrOk {
 		return msg
 	}
