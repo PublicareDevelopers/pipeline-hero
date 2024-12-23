@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var exclude string
+var exclude, sastPath string
 
 // sastCmd represents the sast command
 var sastCmd = &cobra.Command{
@@ -30,7 +30,7 @@ var sastCmd = &cobra.Command{
 			fmt.Println("set env variable", key, "to", value)
 		}
 
-		res, err := cmds.GoSASTProxy(exclude)
+		res, err := cmds.GoSASTProxy(exclude, sastPath)
 		if err != nil {
 			color.Red("Error: %s\n", err)
 			os.Exit(255)
@@ -45,4 +45,5 @@ func init() {
 	rootCmd.AddCommand(sastCmd)
 
 	sastCmd.Flags().StringVarP(&exclude, "exclude", "e", "G104", "exclude files from the SAST check")
+	sastCmd.Flags().StringVarP(&sastPath, "path", "p", "./...", "path to the files to check")
 }

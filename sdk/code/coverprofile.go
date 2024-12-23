@@ -8,12 +8,19 @@ import (
 )
 
 func (a *Analyser) parseCoverProfile() {
+	//make a defer to avoid a panic
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in f", r)
+		}
+	}()
+
 	//read a.CoverProfile line for line
 
 	for _, line := range strings.Split(a.CoverProfile, "\n") {
 		profile := Profile{}
 		tabs := strings.Split(line, "\t")
-		if len(tabs) < 2 {
+		if len(tabs) < 3 {
 			continue
 		}
 
