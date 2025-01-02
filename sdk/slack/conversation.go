@@ -21,7 +21,7 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 	startBlocks = append(startBlocks, getDividerBlock())
 
 	if len(pipeErrors) > 0 {
-		author := "channel"
+		author := "@channel"
 
 		branch := os.Getenv("BITBUCKET_BRANCH")
 		if branch != "main" {
@@ -33,7 +33,7 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 
 			commitAuthor, err := client.GetCommitAuthor()
 			if err == nil {
-				author = commitAuthor
+				author = fmt.Sprintf("<@%s>", commitAuthor)
 			}
 		}
 
@@ -41,7 +41,7 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 			"type": "section",
 			"text": map[string]any{
 				"type": "mrkdwn",
-				"text": fmt.Sprintf(":fire: *%s* \n @%s actions required", "pipeline-hero failed", author),
+				"text": fmt.Sprintf(":fire: *%s* \n %s actions required", "pipeline-hero failed", author),
 			},
 		}
 
