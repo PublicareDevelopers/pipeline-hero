@@ -21,11 +21,27 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 	startBlocks = append(startBlocks, getDividerBlock())
 
 	if len(pipeErrors) > 0 {
+		author := "channel"
+
+		branch := os.Getenv("BITBUCKET_BRANCH")
+		if branch != "main" {
+			client := platform.New()
+			client.SetCommitAuthorRequest(platform.CommitAuthorRequest{
+				Repository: os.Getenv("BITBUCKET_REPO_SLUG"),
+				CommitId:   os.Getenv("BITBUCKET_COMMIT"),
+			})
+
+			commitAuthor, err := client.GetCommitAuthor()
+			if err == nil {
+				author = commitAuthor
+			}
+		}
+
 		errorMessage := map[string]any{
 			"type": "section",
 			"text": map[string]any{
 				"type": "mrkdwn",
-				"text": fmt.Sprintf(":fire: *%s* \n @channel actions required", "pipeline-hero failed"),
+				"text": fmt.Sprintf(":fire: *%s* \n @%s actions required", "pipeline-hero failed", author),
 			},
 		}
 

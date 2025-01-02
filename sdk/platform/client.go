@@ -31,6 +31,10 @@ func (c *Client) SetDependenciesRequest(request DependenciesRequest) {
 	c.dependenciesRequest = request
 }
 
+func (c *Client) SetCommitAuthorRequest(request CommitAuthorRequest) {
+	c.commitAuthorRequest = request
+}
+
 func (c *Client) Do() (Response, error) {
 	resp := Response{}
 
@@ -177,4 +181,50 @@ func (c *Client) SendDependencies() (map[string]any, error) {
 	err = json.NewDecoder(response.Body).Decode(&resp)
 
 	return resp, err
+}
+
+func (c *Client) GetCommitAuthor() (string, error) {
+	author := "channel"
+
+	payload, err := json.Marshal(c.commitAuthorRequest)
+	if err != nil {
+		return author, err
+	}
+
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", c.origin+"commitauthor", bytes.NewReader(payload))
+	if err != nil {
+		fmt.Printf("Error creating request: %s", err)
+		return author, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", c.token)
+
+	response, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("Error sending request: %s", err)
+		return author, err
+	}
+
+	if response.StatusCode >= 300 {
+		var errResp any
+		err = json.NewDecoder(response.Body).Decode(&errResp)
+
+		return author, fmt.Errorf("error status: %s; %+v", response.Status, errResp)
+	}
+
+	defer response.Body.Close()
+	type AuthorResponse struct {
+		Author string `json:"author"`
+	}
+
+	var authResp AuthorResponse
+
+	err = json.NewDecoder(response.Body).Decode(&authResp)
+	if err != nil {
+		return author, err
+	}
+
+	return authResp.Author, nil
 }
