@@ -55,3 +55,21 @@ func TestClient_CreateSecurityTask(t *testing.T) {
 
 	t.Log(resp)
 }
+
+func TestClient_GetCommitAuthor(t *testing.T) {
+	client := New()
+	client.SetCommitAuthorRequest(CommitAuthorRequest{
+		Repository: "vh-entity-interest",
+		CommitId:   "b8f7c1f8b72cf82e9d3232f9c42ee2158ade4a83",
+	},
+	)
+
+	author, err := client.GetCommitAuthor()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if author != "Benjamin E." {
+		t.Errorf("wanted to get author Benjamin E., got %s", author)
+	}
+}

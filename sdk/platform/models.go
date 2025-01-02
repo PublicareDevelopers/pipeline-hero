@@ -7,6 +7,7 @@ type Client struct {
 	securityFixRequest  SecurityFixRequest
 	sastFixRequest      SASTFixRequest
 	dependenciesRequest DependenciesRequest
+	commitAuthorRequest CommitAuthorRequest
 }
 
 type SecurityFixRequest struct {
@@ -21,6 +22,12 @@ type SASTFixRequest struct {
 	BitbucketProject string `json:"bitbucketProject"`
 	Repository       string `json:"repository"`
 	Language         string `json:"language"`
+}
+
+type CommitAuthorRequest struct {
+	BitbucketProject string `json:"bitbucketProject"`
+	Repository       string `json:"repository"`
+	CommitId         string `json:"commitId"`
 }
 
 type DependenciesRequest struct {
