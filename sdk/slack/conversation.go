@@ -123,6 +123,18 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 		fmt.Println(err)
 	}
 
+	codeReviewBlocks, err := client.GetCodeReviewBlocks(analyser.CodeReview)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if len(codeReviewBlocks) > 0 {
+		err = client.SendProgressSlackBlocks(codeReviewBlocks)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
 	platformClient := platform.New()
 	var analyserMap map[string]any
 
@@ -275,12 +287,25 @@ func (client *Client) StartJSConversation(analyser *code.JSAnalyser) error {
 	err = client.BuildJSThreadBlocks(analyser)
 	if err != nil {
 		fmt.Println(err)
-		return nil
 	}
 
-	err = client.SendProgressSlackBlocks(client.Blocks)
+	if len(client.Blocks) > 0 {
+		err = client.SendProgressSlackBlocks(client.Blocks)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	codeReviewBlocks, err := client.GetCodeReviewBlocks(analyser.CodeReview)
 	if err != nil {
 		fmt.Println(err)
+	}
+
+	if len(codeReviewBlocks) > 0 {
+		err = client.SendProgressSlackBlocks(codeReviewBlocks)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	platformClient := platform.New()
@@ -430,6 +455,18 @@ func (client *Client) StartPHPConversation(analyser *code.PHPAnalyser) error {
 	if err != nil {
 		return err
 	}
+
+	//codeReviewBlocks, err := client.GetCodeReviewBlocks(analyser.CodeReview)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//
+	//if len(codeReviewBlocks) > 0 {
+	//	err = client.SendProgressSlackBlocks(codeReviewBlocks)
+	//	if err != nil {
+	//		fmt.Println(err)
+	//	}
+	//}
 
 	//now we can use the threads
 	err = client.BuildPHPThreadBlocks(analyser)

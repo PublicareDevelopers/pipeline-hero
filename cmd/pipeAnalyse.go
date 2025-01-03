@@ -56,6 +56,9 @@ var pipeAnalyseCmd = &cobra.Command{
 		wg.Add(1)
 		go analyseSASTCheck(analyser, &wg)
 
+		wg.Add(1)
+		go analyseCodeReview(analyser, &wg)
+
 		wg.Wait()
 
 		if !useSlack {
@@ -263,4 +266,17 @@ func analyseSASTCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 	}
 
 	color.Green("SAST check passed\n")
+}
+
+func analyseCodeReview(analyser *code.Analyser, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	res, err := cmds.CodeReview("./...")
+	if err != nil {
+		color.Red("error getting code review: %s\n", err)
+		analyser.PushError(fmt.Sprintf("cannot get code review: %s\n", err))
+		return
+	}
+
+	analyser.SetCodeReview(res)
 }

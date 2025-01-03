@@ -136,6 +136,36 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 	return nil
 }
 
+func (client *Client) GetCodeReviewBlocks(codeReview string) ([]map[string]any, error) {
+	//split analyser.TestResult in text blocks not longer than 3000 characters
+	//slack has a limit of 3000 characters per text block
+	codeReviewMsg := codeReview
+	blocks := []map[string]any{}
+
+	for len(codeReviewMsg) > 3000 {
+		block := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": codeReviewMsg[:3000],
+			},
+		}
+		blocks = append(blocks, block)
+		codeReviewMsg = codeReviewMsg[3000:]
+	}
+
+	block := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": codeReviewMsg,
+		},
+	}
+	blocks = append(blocks, block)
+
+	return blocks, nil
+}
+
 func (client *Client) BuildJSThreadBlocks(analyser *code.JSAnalyser) error {
 	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
 	origin := os.Getenv("BITBUCKET_GIT_HTTP_ORIGIN")

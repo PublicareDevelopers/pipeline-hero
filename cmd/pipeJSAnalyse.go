@@ -44,6 +44,9 @@ var pipeJSAnalyseCmd = &cobra.Command{
 		wg.Add(1)
 		go analyseJSOutDates(analyser, &wg)
 
+		wg.Add(1)
+		go analyseJSCodeReview(analyser, &wg)
+
 		wg.Wait()
 
 		if !useSlack {
@@ -142,4 +145,16 @@ func analyseJSOutDates(analyser *code.JSAnalyser, wg *sync.WaitGroup) {
 	}
 
 	analyser.SetOutDates(outDates)
+}
+
+func analyseJSCodeReview(analyser *code.JSAnalyser, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	codereview, err := cmds.CodeReviewVueMess("all")
+	if err != nil {
+		analyser.PushError("code review failed")
+		return
+	}
+
+	analyser.SetCodeReview(codereview)
 }

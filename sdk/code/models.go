@@ -27,6 +27,7 @@ type Analyser struct {
 	Errors           []string
 	Warnings         []string
 	TestResult       string
+	CodeReview       string
 	Profiles         []Profile
 	dependencies     []Dependency //deprecated
 	lock             *sync.Mutex
@@ -39,6 +40,7 @@ type JSAnalyser struct {
 	VulnCheck        string
 	HasVulnCheckFail bool
 	HasErrors        bool
+	CodeReview       string
 	Errors           []string
 	Warnings         []string
 	HasWarnings      bool
@@ -54,6 +56,7 @@ type PHPAnalyser struct {
 	VulnCheck        string
 	HasVulnCheckFail bool
 	HasErrors        bool
+	CodeReview       string
 	Errors           []string
 	Warnings         []string
 	HasWarnings      bool
@@ -164,6 +167,13 @@ func (a *Analyser) SetVulnCheck(vulnCheck string) *Analyser {
 func (a *Analyser) SetSASTCheck(sastCheck string) *Analyser {
 	a.lock.Lock()
 	a.SASTCheck = sastCheck
+	a.lock.Unlock()
+	return a
+}
+
+func (a *Analyser) SetCodeReview(codeReview string) *Analyser {
+	a.lock.Lock()
+	a.CodeReview = codeReview
 	a.lock.Unlock()
 	return a
 }

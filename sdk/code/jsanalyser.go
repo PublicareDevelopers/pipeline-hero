@@ -18,6 +18,13 @@ func (a *JSAnalyser) SetThreshold(threshold float64) *JSAnalyser {
 	return a
 }
 
+func (a *JSAnalyser) SetCodeReview(codeReview string) *JSAnalyser {
+	a.lock.Lock()
+	a.CodeReview = codeReview
+	a.lock.Unlock()
+	return a
+}
+
 func (a *JSAnalyser) SetVulnCheck(vulnCheck string) *JSAnalyser {
 	a.lock.Lock()
 	a.VulnCheck = vulnCheck
