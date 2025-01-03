@@ -232,15 +232,24 @@ func analyseSASTCheck(analyser *code.Analyser, wg *sync.WaitGroup) {
 			analyser.PushError(fmt.Sprintf("cannot parse the gosec.json: %s\n", err))
 		}
 
-		sastCheckString := fmt.Sprintf("Found %d SAST issues\n", sastStruct.Stats.Found)
-		for _, issue := range sastStruct.Issues {
-			sastCheckString += fmt.Sprintf("- %s (CWE %s) at %s line %s\n Confidence: %s; Severity: %s; \n\n", issue.Details, issue.Cwe.ID, issue.File, issue.Line, issue.Confidence, issue.Severity)
+		sastCheckString := errString
+
+		if sastStruct.Stats.Found > 0 {
+			sastCheckString = fmt.Sprintf("Found %d SAST issues\n", sastStruct.Stats.Found)
+			for _, issue := range sastStruct.Issues {
+				sastCheckString += fmt.Sprintf("- %s (CWE %s) at %s line %s\n Confidence: %s; Severity: %s; \n\n", issue.Details, issue.Cwe.ID, issue.File, issue.Line, issue.Confidence, issue.Severity)
+			}
 		}
 
 		analyser.SetSASTCheck(sastCheckJson)
 		analyser.PushError(sastCheckString)
 
 		color.Red(sastCheckString)
+
+		//we do not want to push a task when found at a pr branch
+		if os.Getenv("BITBUCKET_BRANCH") != "main" {
+			return
+		}
 
 		resp, err := sendSastToPlatform(sastCheckString)
 		if err != nil {
