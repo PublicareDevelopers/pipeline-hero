@@ -124,7 +124,7 @@ func CodeReviewByNilCheck(codePart string) (string, error) {
 	return string(out), nil
 }
 
-func CodeReviewVueMess(level string, output string) (string, error) {
+func CodeReviewVueMess(level string, output string, path string) (string, error) {
 	_, err := exec.Command("npm", "install", "vue-mess-detector", "--save-dev").Output()
 	if err != nil {
 		return "", err
@@ -133,6 +133,7 @@ func CodeReviewVueMess(level string, output string) (string, error) {
 	//npx vue-mess-detector analyze
 	out, err := exec.Command("npx", "vue-mess-detector", "analyse",
 		"--group=file", fmt.Sprintf("--level=%s", level),
+		fmt.Sprintf("--path=%s", path),
 		"--health-error=75", fmt.Sprintf("--output=%s", output),
 	).Output()
 	if err != nil {

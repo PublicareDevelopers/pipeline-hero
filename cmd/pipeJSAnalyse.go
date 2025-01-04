@@ -153,7 +153,7 @@ func analyseJSOutDates(analyser *code.JSAnalyser, wg *sync.WaitGroup) {
 func analyseJSCodeReview(analyser *code.JSAnalyser, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	codereview, err := cmds.CodeReviewVueMess("all", "text")
+	codereview, err := cmds.CodeReviewVueMess("all", "text", "./")
 	if err != nil {
 		analyser.PushError("code review failed")
 		return
