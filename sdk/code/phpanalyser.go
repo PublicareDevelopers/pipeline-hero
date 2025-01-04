@@ -18,6 +18,13 @@ func (a *PHPAnalyser) SetThreshold(threshold float64) *PHPAnalyser {
 	return a
 }
 
+func (a *PHPAnalyser) SetCodeReview(codeReview string) *PHPAnalyser {
+	a.lock.Lock()
+	a.CodeReview = codeReview
+	a.lock.Unlock()
+	return a
+}
+
 func (a *PHPAnalyser) SetOutDates(outDates []php.OutDate) *PHPAnalyser {
 	a.lock.Lock()
 	a.OutDates = outDates

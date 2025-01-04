@@ -44,6 +44,11 @@ var pipeJSAnalyseCmd = &cobra.Command{
 		wg.Add(1)
 		go analyseJSOutDates(analyser, &wg)
 
+		if useCodeReview {
+			wg.Add(1)
+			go analyseJSCodeReview(analyser, &wg)
+		}
+
 		wg.Wait()
 
 		if !useSlack {
@@ -90,6 +95,7 @@ var pipeJSAnalyseCmd = &cobra.Command{
 func init() {
 	pipeCmd.AddCommand(pipeJSAnalyseCmd)
 	pipeJSAnalyseCmd.Flags().BoolVarP(&useSlack, "slack", "s", false, "Send results to slack")
+	pipeJSAnalyseCmd.Flags().BoolVarP(&useCodeReview, "codereview", "r", false, "make a codereview at slack")
 	pipeJSAnalyseCmd.Flags().StringToStringVarP(&envVariables, "env", "e", map[string]string{}, "Environment variables to set")
 	pipeJSAnalyseCmd.Flags().Float64VarP(&coverageThreshold, "coverage-threshold", "c", 75.0, "Coverage threshold to use")
 }
@@ -142,4 +148,16 @@ func analyseJSOutDates(analyser *code.JSAnalyser, wg *sync.WaitGroup) {
 	}
 
 	analyser.SetOutDates(outDates)
+}
+
+func analyseJSCodeReview(analyser *code.JSAnalyser, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	codereview, err := cmds.CodeReviewVueMess("all", "text", "./")
+	if err != nil {
+		analyser.PushError("code review failed")
+		return
+	}
+
+	analyser.SetCodeReview(codereview)
 }

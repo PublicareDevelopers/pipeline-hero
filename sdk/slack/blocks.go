@@ -136,6 +136,60 @@ func (client *Client) BuildThreadBlocks(analyser *code.Analyser) error {
 	return nil
 }
 
+func (client *Client) GetCodeReviewBlocks(codeReview string) ([]map[string]any, error) {
+	//split analyser.TestResult in text blocks not longer than 3000 characters
+	//slack has a limit of 3000 characters per text block
+	codeReviewMsg := codeReview
+	blocks := []map[string]any{}
+
+	//headline block
+	//max 3000 characters
+	headlineBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": "*Code review:*\n",
+		},
+	}
+
+	blocks = append(blocks, headlineBlock)
+
+	for len(codeReviewMsg) > 3000 {
+		block := map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": codeReviewMsg[:3000],
+			},
+		}
+		blocks = append(blocks, block)
+		codeReviewMsg = codeReviewMsg[3000:]
+	}
+
+	block := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": codeReviewMsg,
+		},
+	}
+	blocks = append(blocks, block)
+
+	//max 50 blocks allowed; when > 50, make 49 blocks and a block with mrkdwn where len of blocks is mentiones
+	if len(blocks) > 50 {
+		blocks = blocks[:49]
+		blocks = append(blocks, map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf("total of %d blocks; have a look at the pipe", len(blocks)),
+			},
+		})
+	}
+
+	return blocks, nil
+}
+
 func (client *Client) BuildJSThreadBlocks(analyser *code.JSAnalyser) error {
 	buildNumber := os.Getenv("BITBUCKET_BUILD_NUMBER")
 	origin := os.Getenv("BITBUCKET_GIT_HTTP_ORIGIN")
