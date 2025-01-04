@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-var useSlack bool
+var useSlack, useCodeReview bool
 var coverageThreshold float64
 
 // pipeCmd represents the pipe command

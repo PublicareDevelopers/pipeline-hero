@@ -142,6 +142,18 @@ func (client *Client) GetCodeReviewBlocks(codeReview string) ([]map[string]any, 
 	codeReviewMsg := codeReview
 	blocks := []map[string]any{}
 
+	//headline block
+	//max 3000 characters
+	headlineBlock := map[string]any{
+		"type": "section",
+		"text": map[string]any{
+			"type": "mrkdwn",
+			"text": "*Code review:*\n",
+		},
+	}
+
+	blocks = append(blocks, headlineBlock)
+
 	for len(codeReviewMsg) > 3000 {
 		block := map[string]any{
 			"type": "section",
@@ -162,6 +174,18 @@ func (client *Client) GetCodeReviewBlocks(codeReview string) ([]map[string]any, 
 		},
 	}
 	blocks = append(blocks, block)
+
+	//max 50 blocks allowed; when > 50, make 49 blocks and a block with mrkdwn where len of blocks is mentiones
+	if len(blocks) > 50 {
+		blocks = blocks[:49]
+		blocks = append(blocks, map[string]any{
+			"type": "section",
+			"text": map[string]any{
+				"type": "mrkdwn",
+				"text": fmt.Sprintf("total of %d blocks; have a look at the pipe", len(blocks)),
+			},
+		})
+	}
 
 	return blocks, nil
 }

@@ -123,15 +123,17 @@ func (client *Client) StartConversation(analyser *code.Analyser, pipeType string
 		fmt.Println(err)
 	}
 
-	codeReviewBlocks, err := client.GetCodeReviewBlocks(analyser.CodeReview)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	if len(codeReviewBlocks) > 0 {
-		err = client.SendProgressSlackBlocks(codeReviewBlocks)
+	if analyser.CodeReview != "" {
+		codeReviewBlocks, err := client.GetCodeReviewBlocks(analyser.CodeReview)
 		if err != nil {
 			fmt.Println(err)
+		}
+
+		if len(codeReviewBlocks) > 0 {
+			err = client.SendProgressSlackBlocks(codeReviewBlocks)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	}
 
@@ -296,15 +298,17 @@ func (client *Client) StartJSConversation(analyser *code.JSAnalyser) error {
 		}
 	}
 
-	codeReviewBlocks, err := client.GetCodeReviewBlocks(analyser.CodeReview)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	if len(codeReviewBlocks) > 0 {
-		err = client.SendProgressSlackBlocks(codeReviewBlocks)
+	if analyser.CodeReview != "" {
+		codeReviewBlocks, err := client.GetCodeReviewBlocks(analyser.CodeReview)
 		if err != nil {
 			fmt.Println(err)
+		}
+
+		if len(codeReviewBlocks) > 0 {
+			err = client.SendProgressSlackBlocks(codeReviewBlocks)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	}
 

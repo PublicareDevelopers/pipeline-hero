@@ -56,8 +56,10 @@ var pipeAnalyseCmd = &cobra.Command{
 		wg.Add(1)
 		go analyseSASTCheck(analyser, &wg)
 
-		wg.Add(1)
-		go analyseCodeReview(analyser, &wg)
+		if useCodeReview {
+			wg.Add(1)
+			go analyseCodeReview(analyser, &wg)
+		}
 
 		wg.Wait()
 
@@ -97,6 +99,7 @@ func init() {
 	pipeCmd.AddCommand(pipeAnalyseCmd)
 	pipeAnalyseCmd.Flags().StringVarP(&testSetup, "test-setup", "t", "./...", "Test setup to use")
 	pipeAnalyseCmd.Flags().BoolVarP(&useSlack, "slack", "s", false, "Send results to slack")
+	pipeAnalyseCmd.Flags().BoolVarP(&useCodeReview, "codereview", "r", false, "make a codereview at slack")
 	pipeAnalyseCmd.Flags().Float64VarP(&coverageThreshold, "coverage-threshold", "c", 75.0, "Coverage threshold to use")
 	pipeAnalyseCmd.Flags().StringToStringVarP(&envVariables, "env", "e", map[string]string{}, "Environment variables to set")
 	pipeAnalyseCmd.Flags().StringVarP(&sastPath, "sast-path", "p", "./...", "Path to the files to check")

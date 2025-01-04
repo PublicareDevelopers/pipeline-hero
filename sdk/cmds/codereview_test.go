@@ -1,6 +1,8 @@
 package cmds
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestCodeReview(t *testing.T) {
 	res, err := CodeReview("./...")
