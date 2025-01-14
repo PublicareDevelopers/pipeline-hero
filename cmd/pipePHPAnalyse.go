@@ -84,7 +84,7 @@ var pipePHPAnalyseCmd = &cobra.Command{
 
 		err = client.StartPHPConversation(analyser)
 		if err != nil {
-			color.Red("Error: %s\n", err)
+			color.Red("slack error: %s\n", err)
 			os.Exit(255)
 		}
 
@@ -113,11 +113,11 @@ func analysePHPVulnCheck(analyser *code.PHPAnalyser, wg *sync.WaitGroup) {
 		analyser.SetVulnCheckFail()
 
 		analyser.PushError(fmt.Sprintf("audit failed: %s", err))
-		color.Red("audit err %s: %s", err, audit)
+		color.Red("analysePHPVulnCheck: audit err %s: %s", err, audit)
 
 		resp, err := sendVulnToPlatformByLanguage(audit, "php")
 		if err != nil {
-			analyser.PushError("sending vuln to platform failed")
+			analyser.PushError("analysePHPVulnCheck: sending vuln to platform failed")
 		}
 
 		color.White(fmt.Sprintf("Vuln Check: %s\n", resp))
@@ -143,7 +143,7 @@ func analysePHPOutDates(analyser *code.PHPAnalyser, wg *sync.WaitGroup) {
 
 	outdatedJson, err := cmds.GetComposerOutDates()
 	if err != nil {
-		color.Red("Error getting OutDates: %s\n", err)
+		color.Red("analysePHPOutDates: Error getting OutDates: %s | %v\n", err, outdatedJson)
 		return
 	}
 
@@ -159,7 +159,7 @@ func analysePHPOutDates(analyser *code.PHPAnalyser, wg *sync.WaitGroup) {
 	for _, outDateEl := range outDatesRaw.Installed {
 		outDate, err := outDateEl.ParseOutDate()
 		if err != nil {
-			color.Red("Error: %s\n", err)
+			color.Red("analysePHPOutDates: Error: %s\n", err)
 			continue
 		}
 

@@ -39,7 +39,7 @@ func GetComposerAudit() (string, error) {
 				return parseComposerAudit(string(out)), nil
 			}
 
-			fmt.Println(exitError.ExitCode(), "code caused npm audit fail")
+			fmt.Println(exitError.ExitCode(), "code caused composer audit fail", err, string(out))
 		}
 
 		return parseComposerAudit(string(out)), err
