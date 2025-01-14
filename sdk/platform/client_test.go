@@ -69,7 +69,7 @@ func TestClient_GetCommitAuthor(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if author != "Benjamin E." {
-		t.Errorf("wanted to get author Benjamin E., got %s", author)
+	if author != "U01ABJTD3DH" {
+		t.Errorf("wanted to get author U01ABJTD3DH, got %s", author)
 	}
 }
